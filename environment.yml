@@ -1,0 +1,15 @@
+name: insightops-ai
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - fastapi
+  - uvicorn
+  - pandas
+  - numpy
+  - python-dotenv
+  - requests
+  # Optional placeholders for future orchestration/scheduling:
+  # - langgraph
+  # - apscheduler
