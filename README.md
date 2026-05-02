@@ -32,11 +32,12 @@ This structure is designed to evolve into a full agentic loop capable of analyzi
 
 ## Setup
 
-conda env create -f environment.yml
-conda activate insightops-ai
+conda env create -f environment.yml  
+conda activate insightops-ai  
 uvicorn app.main:app --reload
 
 ## Current Capabilities
+
 - Basic query classification
 - Tool-based data analysis (sales example)
 - Simple agent loop (decision + execution)
