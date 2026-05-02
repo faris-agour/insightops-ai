@@ -7,7 +7,7 @@ InsightOps AI is an early-stage agentic system designed to analyze business data
 Unlike traditional dashboards, InsightOps AI focuses on explaining why changes happen and suggesting what to do next.
 ## Early Scope
 
-- Minimal API entrypoint for future orchestration
+- Minimal API entrypoint with a first agent-like analyze endpoint
 - Clean module layout for agents, analysis, services, and tools
 - Simple local environment setup
 - Extensible structure without over-engineering
@@ -16,7 +16,8 @@ Unlike traditional dashboards, InsightOps AI focuses on explaining why changes h
 
 The FastAPI app is the entrypoint and will coordinate future system flows.
 Analysis logic belongs in the analysis layer, external integrations in services, and reusable helper functions in tools.
-Agent workflows will be added gradually in the agents layer as requirements become clear.
+The first simple agent loop classifies user intent and calls a matching tool.
+Agent workflows will be expanded gradually in the agents layer as requirements become clear.
 
 ## Tech Stack
 
