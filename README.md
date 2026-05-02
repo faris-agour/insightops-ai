@@ -1,12 +1,10 @@
 # InsightOps AI
 
-InsightOps AI is a lightweight foundation for an agentic data analyst system.
-It is built to analyze structured data, explain insights, and support simple actions as the platform evolves.
+InsightOps AI is an early-stage agentic system designed to analyze business data, generate insights, and assist in decision-making workflows.
 
 ## Key Idea
 
-Agentic system that analyzes data, explains insights, and can take actions.
-
+Unlike traditional dashboards, InsightOps AI focuses on explaining why changes happen and suggesting what to do next.
 ## Early Scope
 
 - Minimal API entrypoint for future orchestration
@@ -31,10 +29,6 @@ Agent workflows will be added gradually in the agents layer as requirements beco
 - requests
 
 ## Setup
-
-1. Create the conda environment.
-2. Activate the environment.
-3. Start the FastAPI app.
 
 conda env create -f environment.yml
 conda activate insightops-ai
