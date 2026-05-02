@@ -1,10 +1,11 @@
 # InsightOps AI
 
-InsightOps AI is an early-stage agentic system designed to analyze business data, generate insights, and assist in decision-making workflows.
+InsightOps AI is an early-stage agentic system that analyzes business data, identifies root causes, and supports decision-making workflows.
 
 ## Key Idea
 
-Unlike traditional dashboards, InsightOps AI focuses on explaining why changes happen and suggesting what to do next.
+Unlike traditional dashboards, InsightOps AI focuses on explaining why changes happen and suggesting what actions to take.
+
 ## Early Scope
 
 - Minimal API entrypoint with a first agent-like analyze endpoint
@@ -14,10 +15,10 @@ Unlike traditional dashboards, InsightOps AI focuses on explaining why changes h
 
 ## Architecture (High Level)
 
-The FastAPI app is the entrypoint and will coordinate future system flows.
-Analysis logic belongs in the analysis layer, external integrations in services, and reusable helper functions in tools.
-The first simple agent loop classifies user intent and calls a matching tool.
-Agent workflows will be expanded gradually in the agents layer as requirements become clear.
+The FastAPI app serves as the system entrypoint and coordinates request handling.
+Analysis logic is handled in the analysis layer, external integrations in services, and reusable utilities in tools.
+A simple agent loop classifies user intent and routes execution to the appropriate tool.
+This structure is designed to evolve into a full agentic loop capable of analyzing, deciding, and acting autonomously.
 
 ## Tech Stack
 
@@ -34,3 +35,8 @@ Agent workflows will be expanded gradually in the agents layer as requirements b
 conda env create -f environment.yml
 conda activate insightops-ai
 uvicorn app.main:app --reload
+
+## Current Capabilities
+- Basic query classification
+- Tool-based data analysis (sales example)
+- Simple agent loop (decision + execution)
