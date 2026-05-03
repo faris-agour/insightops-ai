@@ -151,24 +151,3 @@ insightops-ai/
 ├── GETTING_STARTED.md         # Setup and running guide
 └── README.md                  # This file
 ```
-
-## Future Roadmap
-
-- [ ] Expand task classifier (ML-based intent detection)
-- [ ] Add more analysis tools (trends, forecasting)
-- [ ] Integrate LLM for natural language queries
-- [ ] Add data persistence layer
-- [ ] Implement workflow automation
-- [ ] Deploy as service (Docker, cloud)
-
-## Development
-
-See [GETTING_STARTED.md](GETTING_STARTED.md) for development workflow and troubleshooting.
-
-## License
-
-[Add license here if applicable]
-
-## Contact
-
-Maintained by InsightOps Team
