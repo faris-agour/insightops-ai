@@ -16,6 +16,29 @@ Unlike traditional dashboards, InsightOps AI focuses on understanding data patte
 - **RESTful API:** FastAPI-based endpoint for query submission
 - **Unit Tests:** Comprehensive test coverage (6/6 passing)
 
+## Project Structure
+
+```
+insightops-ai/
+├── app/
+│   ├── main.py                # FastAPI entrypoint
+│   ├── agents/
+│   │   └── simple_agent.py    # Task classifier, agent loop
+│   ├── tools/
+│   │   └── sales_tools.py     # Sales analysis tool
+│   ├── analysis/              # Future: complex analysis modules
+│   ├── services/              # Future: external integrations
+│   └── __init__.py
+├── data/
+│   └── sales.csv              # Sample dataset
+├── tests/
+│   ├── test_agent_loop.py     # 6 unit tests
+│   └── README.md              # Test documentation
+├── environment.yml            # Conda dependencies
+├── GETTING_STARTED.md         # Setup and running guide
+└── README.md                  # This file
+```
+
 ## Architecture
 
 ```
@@ -128,26 +151,3 @@ See [tests/README.md](tests/README.md) for detailed test documentation.
 
 - [GETTING_STARTED.md](GETTING_STARTED.md) — Setup, running, and common issues
 - [tests/README.md](tests/README.md) — Test overview and coverage
-
-## Project Structure
-
-```
-insightops-ai/
-├── app/
-│   ├── main.py                 # FastAPI entrypoint
-│   ├── agents/
-│   │   └── simple_agent.py    # Task classifier, agent loop
-│   ├── tools/
-│   │   └── sales_tools.py     # Sales analysis tool
-│   ├── analysis/              # Future: complex analysis modules
-│   ├── services/              # Future: external integrations
-│   └── __init__.py
-├── data/
-│   └── sales.csv              # Sample dataset
-├── tests/
-│   ├── test_agent_loop.py     # 6 unit tests
-│   └── README.md              # Test documentation
-├── environment.yml            # Conda dependencies
-├── GETTING_STARTED.md         # Setup and running guide
-└── README.md                  # This file
-```
