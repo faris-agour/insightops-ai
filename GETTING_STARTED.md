@@ -37,7 +37,7 @@ python -m unittest discover -s tests -p "test_*.py"
 
 Expected output:
 ```
-Ran 6 tests in 0.003s
+Ran 7 tests in 0.003s
 OK
 ```
 
@@ -75,9 +75,12 @@ print(response.json())
 {
   "task": "sales_analysis",
   "result": {
-    "total_revenue": 11960.0
+    "total_revenue": 690383.75,
+    "average_daily_revenue": 32875.42,
+    "top_product": "Analytics Pack",
+    "worst_product": "Reporting Add-on"
   },
-  "message": "Basic sales analysis completed"
+  "insight": "Sales are stable overall with Analytics Pack leading performance, while Reporting Add-on shows weaker results."
 }
 ```
 
@@ -100,7 +103,7 @@ Main analysis endpoint. Classifies query intent and executes matching tool.
   {
     "task": "string",
     "result": "object",
-    "message": "string"
+    "insight": "string"
   }
   ```
 
@@ -114,11 +117,12 @@ insightops-ai/
 │   │   └── simple_agent.py    # Task classifier and agent loop
 │   ├── tools/
 │   │   └── sales_tools.py     # Tool implementations
-│   ├── analysis/              # Future analysis modules
-│   ├── services/              # Future service integrations
 │   └── __init__.py
+├── docs/
+│   └── screenshots/           # Placeholder request output screenshots
 ├── data/
-│   └── sales.csv              # Sample sales dataset
+│   ├── sales.csv              # Synthetic sales dataset
+│   └── generate_sales_data.py # Dataset generator script
 ├── tests/
 │   ├── test_agent_loop.py     # Unit tests
 │   └── README.md              # Test documentation
@@ -151,10 +155,3 @@ Run on a different port:
 ```bash
 uvicorn app.main:app --reload --port 8001
 ```
-
-## Next Steps
-
-- Extend task classifier with more keywords
-- Add new tool implementations in `app/tools/`
-- Expand test coverage in `tests/`
-- Integrate with external APIs in `app/services/`

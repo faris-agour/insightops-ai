@@ -27,9 +27,9 @@ insightops-ai/
 │   │   └── simple_agent.py    # Task classifier, agent loop
 │   ├── tools/
 │   │   └── sales_tools.py     # Sales analysis tool
-│   ├── analysis/              # Future: complex analysis modules
-│   ├── services/              # Future: external integrations
 │   └── __init__.py
+├── docs/
+│   └── screenshots/           # Placeholder screenshots for Swagger request outputs
 ├── data/
 │   ├── sales.csv              # Realistic synthetic sales dataset
 │   └── generate_sales_data.py # Dataset generator with anomalies
@@ -56,9 +56,7 @@ Result Aggregator (structured response)
 **Layers:**
 - **API Layer** (`app/main.py`): FastAPI entrypoint and endpoints
 - **Agent Layer** (`app/agents/`): Task classification and orchestration
-- **Tool Layer** (`app/tools/`): Tool implementations (sales, future)
-- **Analysis Layer** (`app/analysis/`): Future complex analysis
-- **Services Layer** (`app/services/`): Future external integrations
+- **Tool Layer** (`app/tools/`): Tool implementations for analysis tasks
 
 ## Tech Stack
 
@@ -158,3 +156,32 @@ See [tests/README.md](tests/README.md) for detailed test documentation.
 - [GETTING_STARTED.md](GETTING_STARTED.md) — Setup, running, and common issues
 - [tests/README.md](tests/README.md) — Test overview and coverage
 
+## Website Request Output Placeholders
+
+These placeholders map to the three tested requests from Swagger UI:
+
+1. `POST /analyze` with `{"query": "sales report"}`
+
+![sales report output placeholder](docs/screenshots/request-1-sales-report.svg)
+
+2. `POST /analyze` with `{"query": "how are sales doing"}`
+
+![how are sales doing output placeholder](docs/screenshots/request-2-how-are-sales-doing.svg)
+
+3. `POST /analyze` with `{"query": "customer churn"}`
+
+![customer churn output placeholder](docs/screenshots/request-3-customer-churn.svg)
+
+Replace each placeholder file with your real screenshot while keeping the same file name.
+
+## Development
+
+See [GETTING_STARTED.md](GETTING_STARTED.md) for development workflow and troubleshooting.
+
+## License
+
+[Add license here if applicable]
+
+## Contact
+
+Maintained by InsightOps Team

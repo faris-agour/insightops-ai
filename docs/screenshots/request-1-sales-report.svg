@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f5f5f5"/>
+  <rect x="40" y="40" width="1120" height="550" rx="12" fill="#ffffff" stroke="#d0d0d0" stroke-width="2"/>
+  <text x="70" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="40" fill="#222222">Placeholder Screenshot</text>
+  <text x="70" y="190" font-family="Segoe UI, Arial, sans-serif" font-size="30" fill="#444444">Request 1: "sales report"</text>
+  <text x="70" y="250" font-family="Consolas, monospace" font-size="24" fill="#666666">POST /analyze</text>
+  <text x="70" y="300" font-family="Consolas, monospace" font-size="24" fill="#666666">Body: {"query": "sales report"}</text>
+  <text x="70" y="520" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#888888">Replace this SVG with your real Swagger output screenshot.</text>
+</svg>
