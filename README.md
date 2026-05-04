@@ -6,15 +6,16 @@ InsightOps AI is an early-stage agentic system designed to analyze structured da
 
 Unlike traditional dashboards, InsightOps AI focuses on understanding data patterns and recommending actions based on analysis. The system employs a lightweight agent architecture that classifies user queries and routes them to appropriate analysis tools.
 
-**Current Status:** Foundation phase with minimal agent loop implementation (6 passing tests).
+**Current Status:** v0.2 foundation with enhanced sales analysis and lightweight insight generation.
 
 ## Key Features
 
-- **Query Classification:** Simple intent-based task routing
+- **Query Classification:** Rule-based intent detection with flexible phrasing support
 - **Tool Integration:** Modular tool architecture for extensibility
-- **Data Analysis:** Initial sales analytics capabilities
+- **Data Analysis:** Sales metrics including total revenue, average daily revenue, and product ranking
+- **Insight Generation:** Rule-based short insight message from computed metrics
 - **RESTful API:** FastAPI-based endpoint for query submission
-- **Unit Tests:** Comprehensive test coverage (6/6 passing)
+- **Unit Tests:** Comprehensive test coverage (7/7 passing)
 
 ## Project Structure
 
@@ -30,9 +31,10 @@ insightops-ai/
 │   ├── services/              # Future: external integrations
 │   └── __init__.py
 ├── data/
-│   └── sales.csv              # Sample dataset
+│   ├── sales.csv              # Realistic synthetic sales dataset
+│   └── generate_sales_data.py # Dataset generator with anomalies
 ├── tests/
-│   ├── test_agent_loop.py     # 6 unit tests
+│   ├── test_agent_loop.py     # 7 unit tests
 │   └── README.md              # Test documentation
 ├── environment.yml            # Conda dependencies
 ├── GETTING_STARTED.md         # Setup and running guide
@@ -44,7 +46,7 @@ insightops-ai/
 ```
 POST /analyze (query)
     ↓
-Task Classifier (simple intent matching)
+Task Classifier (rule-based intent detection)
     ↓
 Tool Router (execute matching tool)
     ↓
@@ -86,7 +88,7 @@ conda activate insightops-ai
 # Run tests (verify setup)
 python -m unittest discover -s tests -p "test_*.py"
 
-# Expected: Ran 6 tests in X.XXXs - OK
+# Expected: Ran 7 tests in X.XXXs - OK
 ```
 
 ### Run the API
@@ -113,26 +115,30 @@ curl -X POST http://127.0.0.1:8000/analyze \
 ## Current Capabilities
 
 ### Task Types
-- **sales_analysis:** Computes total revenue from sales data
+- **sales_analysis:** Computes revenue metrics and returns a short insight summary
 - **unknown:** Fallback for unrecognized queries
 
 ### Data Sources
-- `data/sales.csv`: Sample sales dataset with date, product, region, revenue
+- `data/sales.csv`: Realistic synthetic dataset with date, product, region, channel, units_sold, revenue, cost
+- `data/generate_sales_data.py`: Dataset generator script with anomaly scenarios
 
 ### Response Format
 ```json
 {
   "task": "sales_analysis",
   "result": {
-    "total_revenue": 11960.0
+    "total_revenue": 690383.75,
+    "average_daily_revenue": 32875.42,
+    "top_product": "Analytics Pack",
+    "worst_product": "Reporting Add-on"
   },
-  "message": "Basic sales analysis completed"
+  "insight": "Sales are stable overall with Analytics Pack leading performance, while Reporting Add-on shows weaker results."
 }
 ```
 
 ## Testing
 
-All tests pass: **6/6** ✅
+All tests pass: **7/7** ✅
 
 ```bash
 # Run all tests
@@ -151,3 +157,24 @@ See [tests/README.md](tests/README.md) for detailed test documentation.
 
 - [GETTING_STARTED.md](GETTING_STARTED.md) — Setup, running, and common issues
 - [tests/README.md](tests/README.md) — Test overview and coverage
+
+## Future Roadmap
+
+- [ ] Expand task classifier (ML-based intent detection)
+- [ ] Add more analysis tools (trends, forecasting)
+- [ ] Integrate LLM for natural language queries
+- [ ] Add data persistence layer
+- [ ] Implement workflow automation
+- [ ] Deploy as service (Docker, cloud)
+
+## Development
+
+See [GETTING_STARTED.md](GETTING_STARTED.md) for development workflow and troubleshooting.
+
+## License
+
+[Add license here if applicable]
+
+## Contact
+
+Maintained by InsightOps Team
