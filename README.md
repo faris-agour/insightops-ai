@@ -1,187 +1,207 @@
 # InsightOps AI
 
-InsightOps AI is an early-stage agentic system designed to analyze structured data, generate actionable insights, and support decision-making workflows.
+InsightOps AI is a lightweight backend assistant for sales analytics. It uses rule-based intent routing (no LLM) with structured outputs from FastAPI.
 
 ## Overview
 
-Unlike traditional dashboards, InsightOps AI focuses on understanding data patterns and recommending actions based on analysis. The system employs a lightweight agent architecture that classifies user queries and routes them to appropriate analysis tools.
-
-**Current Status:** v0.2 foundation with enhanced sales analysis and lightweight insight generation.
+The API receives a user query at POST /analyze, classifies intent using simple matching rules, routes to the right sales tool, and returns a structured result plus a short insight.
 
 ## Key Features
 
-- **Query Classification:** Rule-based intent detection with flexible phrasing support
-- **Tool Integration:** Modular tool architecture for extensibility
-- **Data Analysis:** Sales metrics including total revenue, average daily revenue, and product ranking
-- **Insight Generation:** Rule-based short insight message from computed metrics
-- **RESTful API:** FastAPI-based endpoint for query submission
-- **Unit Tests:** Comprehensive test coverage (7/7 passing)
-
-## Project Structure
-
-```
-insightops-ai/
-├── app/
-│   ├── main.py                # FastAPI entrypoint
-│   ├── agents/
-│   │   └── simple_agent.py    # Task classifier, agent loop
-│   ├── tools/
-│   │   └── sales_tools.py     # Sales analysis tool
-│   └── __init__.py
-├── docs/
-│   └── screenshots/           # Placeholder screenshots for Swagger request outputs
-├── data/
-│   ├── sales.csv              # Realistic synthetic sales dataset
-│   └── generate_sales_data.py # Dataset generator with anomalies
-├── tests/
-│   ├── test_agent_loop.py     # 7 unit tests
-│   └── README.md              # Test documentation
-├── environment.yml            # Conda dependencies
-├── GETTING_STARTED.md         # Setup and running guide
-└── README.md                  # This file
-```
+- Multi-intent sales query classification
+- Structured analytics responses
+- Rule-based insights per intent
+- FastAPI endpoint for easy testing in Swagger
+- Unit-tested behavior
 
 ## Architecture
 
 ```
 POST /analyze (query)
     ↓
-Task Classifier (rule-based intent detection)
+Intent Classifier (rule-based)
     ↓
-Tool Router (execute matching tool)
+Task Router
     ↓
-Result Aggregator (structured response)
+Sales Tool Function
+    ↓
+Structured Result + Insight
 ```
 
 **Layers:**
-- **API Layer** (`app/main.py`): FastAPI entrypoint and endpoints
-- **Agent Layer** (`app/agents/`): Task classification and orchestration
-- **Tool Layer** (`app/tools/`): Tool implementations for analysis tasks
+- API layer: `app/main.py`
+- Agent layer: `app/agents/simple_agent.py`
+- Tool layer: `app/tools/sales_tools.py`
 
-## Tech Stack
+## Website Request Bodies and Responses
 
-- **Runtime:** Python 3.11
-- **Framework:** FastAPI + Uvicorn
-- **Data:** Pandas, NumPy
-- **Configuration:** python-dotenv
-- **HTTP:** requests
-- **Testing:** unittest
+### 1. Sales Report
 
-## Quick Start
+Request body:
 
-### Prerequisites
-- Python 3.10+ (3.11 recommended)
-- conda or compatible environment manager
-
-### Installation
-
-```bash
-# Clone or navigate to the repository
-cd insightops-ai
-
-# Create environment
-conda env create -f environment.yml
-conda activate insightops-ai
-
-# Run tests (verify setup)
-python -m unittest discover -s tests -p "test_*.py"
-
-# Expected: Ran 7 tests in X.XXXs - OK
+```json
+{ "query": "sales report" }
 ```
 
-### Run the API
+Response body:
 
-```bash
-# Start development server
-uvicorn app.main:app --reload
-```
-
-Server available at: `http://127.0.0.1:8000`
-
-### Test the Endpoint
-
-```bash
-# Health check
-curl http://127.0.0.1:8000/
-
-# Analyze query
-curl -X POST http://127.0.0.1:8000/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"query":"analyze sales"}'
-```
-
-## Current Capabilities
-
-### Task Types
-- **sales_analysis:** Computes revenue metrics and returns a short insight summary
-- **unknown:** Fallback for unrecognized queries
-
-### Data Sources
-- `data/sales.csv`: Realistic synthetic dataset with date, product, region, channel, units_sold, revenue, cost
-- `data/generate_sales_data.py`: Dataset generator script with anomaly scenarios
-
-### Response Format
 ```json
 {
-  "task": "sales_analysis",
+  "task": "sales_report",
   "result": {
     "total_revenue": 690383.75,
     "average_daily_revenue": 32875.42,
     "top_product": "Analytics Pack",
     "worst_product": "Reporting Add-on"
   },
-  "insight": "Sales are stable overall with Analytics Pack leading performance, while Reporting Add-on shows weaker results."
+  "insight": "Sales report is ready. Analytics Pack is leading, while Reporting Add-on is trailing."
 }
 ```
 
-## Testing
+![sales report output](docs/screenshots/request-1-sales-report.svg)
 
-All tests pass: **7/7** ✅
+### 2. Sales Status / Trend
 
-```bash
-# Run all tests
-python -m unittest discover -s tests -p "test_*.py"
+Request body:
 
-# With verbose output
-python -m unittest discover -s tests -p "test_*.py" -v
-
-# Run single test
-python -m unittest tests.test_agent_loop.TestAgentLoop.test_run_agent_sales
+```json
+{ "query": "how are sales doing this week?" }
 ```
 
-See [tests/README.md](tests/README.md) for detailed test documentation.
+Response body:
+
+```json
+{
+  "task": "sales_status",
+  "result": {
+    "total_revenue": 690383.75,
+    "average_daily_revenue": 32875.42,
+    "trend": "stable",
+    "daily_variation_pct": 22.05
+  },
+  "insight": "Sales are stable with moderate variation across days."
+}
+```
+
+![sales status output](docs/screenshots/request-2-how-are-sales-doing.svg)
+
+### 3. Compare Sales by Region
+
+Request body:
+
+```json
+{ "query": "compare sales by region" }
+```
+
+Response body:
+
+```json
+{
+  "task": "sales_by_region",
+  "result": {
+    "best_region": "East",
+    "best_region_revenue": 250093.02,
+    "worst_region": "South",
+    "worst_region_revenue": 196046.47,
+    "regions": [
+      {
+        "region": "East",
+        "revenue": 250093.02
+      },
+      {
+        "region": "North",
+        "revenue": 244244.26
+      },
+      {
+        "region": "South",
+        "revenue": 196046.47
+      }
+    ]
+  },
+  "insight": "Region East has the highest sales."
+}
+```
+
+![sales by region output](docs/screenshots/request-3-compare-sales-by-region.svg)
+
+### 4. Worst Performing Product
+
+Request body:
+
+```json
+{ "query": "what is the worst performing product?" }
+```
+
+Response body:
+
+```json
+{
+  "task": "worst_product",
+  "result": {
+    "product": "Reporting Add-on",
+    "revenue": 79795.15
+  },
+  "insight": "Reporting Add-on is underperforming compared to other products."
+}
+```
+
+![worst product output](docs/screenshots/request-4-worst-performing-product.svg)
+
+## Environment Setup
+
+### Prerequisites
+
+- Python 3.10+ (3.11 recommended)
+- conda or compatible environment manager
+
+### Create and Activate Environment
+
+```bash
+cd insightops-ai
+conda env create -f environment.yml
+conda activate insightops-ai
+```
+
+## Run API
+
+```bash
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
+```
+
+Open Swagger UI at http://127.0.0.1:8010/docs
+
+## Testing
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+## Project Structure
+
+```
+insightops-ai/
+├── app/
+│   ├── main.py
+│   ├── agents/
+│   │   └── simple_agent.py
+│   ├── tools/
+│   │   └── sales_tools.py
+│   └── __init__.py
+├── docs/
+│   └── screenshots/
+├── data/
+│   ├── sales.csv
+│   └── generate_sales_data.py
+├── tests/
+│   ├── test_agent_loop.py
+│   └── README.md
+├── environment.yml
+├── GETTING_STARTED.md
+└── README.md
+```
 
 ## Documentation
 
-- [GETTING_STARTED.md](GETTING_STARTED.md) — Setup, running, and common issues
-- [tests/README.md](tests/README.md) — Test overview and coverage
-
-## Website Request Output Placeholders
-
-These placeholders map to the three tested requests from Swagger UI:
-
-1. `POST /analyze` with `{"query": "sales report"}`
-
-![sales report output placeholder](docs/screenshots/request-1-sales-report.svg)
-
-2. `POST /analyze` with `{"query": "how are sales doing"}`
-
-![how are sales doing output placeholder](docs/screenshots/request-2-how-are-sales-doing.svg)
-
-3. `POST /analyze` with `{"query": "customer churn"}`
-
-![customer churn output placeholder](docs/screenshots/request-3-customer-churn.svg)
-
-Replace each placeholder file with your real screenshot while keeping the same file name.
-
-## Development
-
-See [GETTING_STARTED.md](GETTING_STARTED.md) for development workflow and troubleshooting.
-
-## License
-
-[Add license here if applicable]
-
-## Contact
-
-Maintained by InsightOps Team
+- [GETTING_STARTED.md](GETTING_STARTED.md)
+- [tests/README.md](tests/README.md)

@@ -1,9 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#f5f5f5"/>
-  <rect x="40" y="40" width="1120" height="550" rx="12" fill="#ffffff" stroke="#d0d0d0" stroke-width="2"/>
-  <text x="70" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="40" fill="#222222">Placeholder Screenshot</text>
-  <text x="70" y="190" font-family="Segoe UI, Arial, sans-serif" font-size="30" fill="#444444">Request 1: "sales report"</text>
-  <text x="70" y="250" font-family="Consolas, monospace" font-size="24" fill="#666666">POST /analyze</text>
-  <text x="70" y="300" font-family="Consolas, monospace" font-size="24" fill="#666666">Body: {"query": "sales report"}</text>
-  <text x="70" y="520" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#888888">Replace this SVG with your real Swagger output screenshot.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900">
+  <rect width="1280" height="900" fill="#f5f5f5"/>
+  <rect x="32" y="32" width="1216" height="836" rx="12" fill="#ffffff" stroke="#d0d0d0" stroke-width="2"/>
+  <text x="64" y="90" font-family="Segoe UI, Arial, sans-serif" font-size="36" fill="#222222">Swagger Output: Sales Report</text>
+  <text x="64" y="140" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#444444">POST /analyze</text>
+  <text x="64" y="180" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#333333">Request Body</text>
+  <text x="64" y="214" font-family="Consolas, monospace" font-size="20" fill="#555555">{ "query": "sales report" }</text>
+  <text x="64" y="268" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#333333">Response Body</text>
+  <text x="64" y="306" font-family="Consolas, monospace" font-size="18" fill="#444444">
+    <tspan x="64" dy="0">{</tspan>
+    <tspan x="64" dy="26">  "task": "sales_report",</tspan>
+    <tspan x="64" dy="26">  "result": {</tspan>
+    <tspan x="64" dy="26">    "total_revenue": 690383.75,</tspan>
+    <tspan x="64" dy="26">    "average_daily_revenue": 32875.42,</tspan>
+    <tspan x="64" dy="26">    "top_product": "Analytics Pack",</tspan>
+    <tspan x="64" dy="26">    "worst_product": "Reporting Add-on"</tspan>
+    <tspan x="64" dy="26">  },</tspan>
+    <tspan x="64" dy="26">  "insight": "Sales report is ready. Analytics Pack is leading, while Reporting Add-on is trailing."</tspan>
+    <tspan x="64" dy="26">}</tspan>
+  </text>
 </svg>
