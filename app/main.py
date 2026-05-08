@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from app.agents.simple_agent import run_agent
 
 
-app = FastAPI(title="InsightOps AI", version="0.1.0")
+app = FastAPI(title="InsightOps AI", version="0.3.0")
 
 
 class AnalyzeRequest(BaseModel):
