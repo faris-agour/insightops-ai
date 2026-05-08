@@ -1,5 +1,6 @@
 import re
 
+from app.agents.llm_decision import LLMDecisionError, decide_with_llm
 from app.tools.sales_tools import (
     get_sales_by_region,
     get_sales_status,
@@ -71,27 +72,88 @@ def build_insight(task: str, result: dict[str, object]) -> str:
     if task == "sales_report":
         top_product = str(result.get("top_product", "Top product"))
         worst_product = str(result.get("worst_product", "other products"))
-        return f"Sales report is ready. {top_product} is leading, while {worst_product} is trailing."
+        total_revenue = float(result.get("total_revenue", 0))
+        avg_daily = float(result.get("average_daily_revenue", 0))
+
+        summary = f"{top_product} leads the portfolio while {worst_product} underperforms."
+        reasoning = (
+            f"With ${total_revenue:,.2f} in total revenue and ${avg_daily:,.2f} daily average, "
+            "the portfolio concentration on top performers indicates opportunity to optimize underperformers."
+        )
+        recommendation = (
+            f"Consider strategies to boost {worst_product}'s performance, such as improved marketing, "
+            "pricing adjustments, or feature enhancements."
+        )
+        return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "sales_status":
         trend = str(result.get("trend", "stable"))
+        daily_change = float(result.get("daily_change_percent", 0))
+
         if trend == "increasing":
-            return "Sales are improving with a positive day-to-day trend."
-        if trend == "decreasing":
-            return "Sales are slowing down and need closer monitoring."
-        return "Sales are stable with moderate variation across days."
+            summary = "Sales momentum is positive with day-to-day growth."
+            reasoning = f"The {daily_change:.1f}% daily increase indicates strong market demand and effective sales execution."
+            recommendation = "Capitalize on this momentum by increasing inventory and marketing spend to maximize the uptrend."
+        elif trend == "decreasing":
+            summary = "Sales are declining and warrant immediate attention."
+            reasoning = f"With a {abs(daily_change):.1f}% daily decrease, the trend suggests market headwinds or execution challenges."
+            recommendation = "Investigate root causes—market saturation, competitive pressure, or internal issues—and take corrective action."
+        else:
+            summary = "Sales performance is holding steady with minor daily fluctuations."
+            reasoning = (
+                f"The relatively stable trend (daily change: {daily_change:.1f}%) suggests a balanced market "
+                "environment without major disruptive factors."
+            )
+            recommendation = "Focus on incremental improvements to product offerings, customer retention, and operational efficiency."
+
+        return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "top_product":
         product = str(result.get("product", "This product"))
-        return f"{product} is currently leading sales performance."
+        revenue = float(result.get("revenue", 0))
+        pct_of_total = float(result.get("percent_of_total_revenue", 0))
+
+        summary = f"{product} is the top revenue generator in the portfolio."
+        reasoning = (
+            f"With ${revenue:,.2f} in revenue ({pct_of_total:.1f}% of total), {product} represents "
+            "the strongest market segment and customer preference alignment."
+        )
+        recommendation = (
+            f"Maintain investment in {product} while leveraging its success to cross-sell and "
+            "upsell complementary products to the same customer base."
+        )
+        return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "worst_product":
         product = str(result.get("product", "This product"))
-        return f"{product} is underperforming compared to other products."
+        revenue = float(result.get("revenue", 0))
+        pct_of_total = float(result.get("percent_of_total_revenue", 0))
+
+        summary = f"{product} is underperforming relative to other offerings."
+        reasoning = (
+            f"At ${revenue:,.2f} ({pct_of_total:.1f}% of total revenue), {product} shows weak market adoption. "
+            "This may signal product-market fit issues, poor positioning, or insufficient customer awareness."
+        )
+        recommendation = (
+            f"Either reinvest in {product} with targeted improvements and marketing, or consider discontinuing "
+            "it to free resources for higher-performing products."
+        )
+        return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "sales_by_region":
-        best_region = str(result.get("best_region", "This region"))
-        return f"Region {best_region} has the highest sales."
+        best_region = str(result.get("best_region", "Unknown region"))
+        best_revenue = float(result.get("best_region_revenue", 0))
+
+        summary = f"Regional sales performance varies, with {best_region} leading the way."
+        reasoning = (
+            f"{best_region} generated ${best_revenue:,.2f}, representing the strongest regional execution. "
+            "Geographic analysis reveals expansion opportunities in underperforming regions."
+        )
+        recommendation = (
+            f"Analyze {best_region}'s success factors and replicate them in lower-performing regions. "
+            "Consider targeted regional campaigns and localized sales strategies."
+        )
+        return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     return "No matching analysis is available for this query yet."
 
@@ -106,7 +168,15 @@ TASK_HANDLERS = {
 
 
 def run_agent(query: str) -> dict[str, object]:
-    task = classify_task(query)
+    task: str
+    model_used: str = "rule-based-fallback"
+
+    try:
+        llm_decision = decide_with_llm(query)
+        task = llm_decision["intent"]
+        model_used = llm_decision.get("model_used", "rule-based-fallback")
+    except LLMDecisionError:
+        task = classify_task(query)
 
     handler = TASK_HANDLERS.get(task)
     if handler:
@@ -115,10 +185,12 @@ def run_agent(query: str) -> dict[str, object]:
             "task": task,
             "result": result,
             "insight": build_insight(task, result),
+            "model_used": model_used,
         }
 
     return {
         "task": task,
         "result": {},
         "insight": build_insight(task, {}),
+        "model_used": model_used,
     }

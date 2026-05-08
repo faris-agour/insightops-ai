@@ -70,10 +70,16 @@ def get_sales_status() -> dict[str, float | str]:
             "average_daily_revenue": 0.0,
             "trend": "no_data",
             "daily_variation_pct": 0.0,
+            "daily_change_percent": 0.0,
         }
 
     first_day_revenue = float(daily_revenue.iloc[0]["revenue"])
     last_day_revenue = float(daily_revenue.iloc[-1]["revenue"])
+    
+    daily_change_percent = 0.0
+    if first_day_revenue > 0:
+        daily_change_percent = ((last_day_revenue - first_day_revenue) / first_day_revenue) * 100
+    
     if first_day_revenue == 0:
         trend = "stable"
     elif last_day_revenue > first_day_revenue * 1.05:
@@ -91,6 +97,7 @@ def get_sales_status() -> dict[str, float | str]:
         "average_daily_revenue": round(average_daily_revenue, 2),
         "trend": trend,
         "daily_variation_pct": round(daily_variation_pct, 2),
+        "daily_change_percent": round(daily_change_percent, 2),
     }
 
 
@@ -98,12 +105,17 @@ def get_top_product() -> dict[str, float | str]:
     sales_df = _load_sales_data()
     product_revenue = _product_revenue(sales_df)
     if product_revenue.empty:
-        return {"product": "", "revenue": 0.0}
+        return {"product": "", "revenue": 0.0, "percent_of_total_revenue": 0.0}
 
+    total_revenue = float(product_revenue["revenue"].sum())
     top_row = product_revenue.loc[product_revenue["revenue"].idxmax()]
+    top_revenue = float(top_row["revenue"])
+    pct = (top_revenue / total_revenue * 100) if total_revenue > 0 else 0.0
+    
     return {
         "product": str(top_row["product"]),
-        "revenue": round(float(top_row["revenue"]), 2),
+        "revenue": round(top_revenue, 2),
+        "percent_of_total_revenue": round(pct, 1),
     }
 
 
@@ -111,12 +123,17 @@ def get_worst_product() -> dict[str, float | str]:
     sales_df = _load_sales_data()
     product_revenue = _product_revenue(sales_df)
     if product_revenue.empty:
-        return {"product": "", "revenue": 0.0}
+        return {"product": "", "revenue": 0.0, "percent_of_total_revenue": 0.0}
 
+    total_revenue = float(product_revenue["revenue"].sum())
     worst_row = product_revenue.loc[product_revenue["revenue"].idxmin()]
+    worst_revenue = float(worst_row["revenue"])
+    pct = (worst_revenue / total_revenue * 100) if total_revenue > 0 else 0.0
+    
     return {
         "product": str(worst_row["product"]),
-        "revenue": round(float(worst_row["revenue"]), 2),
+        "revenue": round(worst_revenue, 2),
+        "percent_of_total_revenue": round(pct, 1),
     }
 
 
