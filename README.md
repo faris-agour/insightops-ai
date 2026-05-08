@@ -35,6 +35,28 @@ v0.3 introduces intelligent orchestration while preserving the v0.2 foundation:
 
 The v0.2 rule-based system remains active as a fallback, ensuring reliability when LLM services are unavailable.
 
+## Project Structure
+
+```
+insightops-ai/
+├── app/
+│   ├── main.py                    # FastAPI application
+│   └── agents/
+│       ├── simple_agent.py        # Intent routing & insights
+│       ├── llm_decision.py        # LLM orchestration
+│       ├── llm_providers.py       # Provider abstractions
+│       └── model_router.py        # Adaptive model selection
+│   └── tools/
+│       └── sales_tools.py         # Analytics functions
+├── data/
+│   └── sales.csv                  # Sample dataset
+├── tests/
+│   └── test_agent_loop.py         # Unit tests
+├── environment.yml                # Conda environment
+├── .env.example                   # Configuration template
+└── README.md                      # This file
+```
+
 ## Current Architecture
 
 ```
@@ -289,24 +311,4 @@ The test suite covers:
 - Tool execution and data validation (4 tests)
 - Provider configuration and routing (4 tests)
 
-## Project Structure
 
-```
-insightops-ai/
-├── app/
-│   ├── main.py                    # FastAPI application
-│   └── agents/
-│       ├── simple_agent.py        # Intent routing & insights
-│       ├── llm_decision.py        # LLM orchestration
-│       ├── llm_providers.py       # Provider abstractions
-│       └── model_router.py        # Adaptive model selection
-│   └── tools/
-│       └── sales_tools.py         # Analytics functions
-├── data/
-│   └── sales.csv                  # Sample dataset
-├── tests/
-│   └── test_agent_loop.py         # Unit tests
-├── environment.yml                # Conda environment
-├── .env.example                   # Configuration template
-└── README.md                      # This file
-```
