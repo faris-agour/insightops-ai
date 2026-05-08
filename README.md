@@ -6,6 +6,17 @@ InsightOps AI is a lightweight backend assistant for sales analytics. v0.3 adds 
 
 The API receives a user query at POST /analyze, tries LLM intent parsing first, falls back to rule-based classification when needed, routes to the right sales tool, and returns a structured result plus a short insight.
 
+## Current Implementation
+
+InsightOps AI v2 is a rule-based multi-intent analytics backend for sales data. It classifies user queries, routes them to the appropriate tool, and returns structured results with short insights.
+
+- Intent detection using keyword groups and pattern matching  
+- Multi-intent routing (report, status, product insights, regional comparison)  
+- Modular tool-based architecture (separate functions per task)  
+- Data analysis using pandas on structured datasets  
+- Structured JSON responses with short rule-based insights  
+- Deterministic and testable design, ready for future LLM integration
+
 ## Key Features
 
 - Multi-intent sales query classification
@@ -16,6 +27,7 @@ The API receives a user query at POST /analyze, tries LLM intent parsing first, 
 - Rule-based insights per intent
 - FastAPI endpoint for easy testing in Swagger
 - Unit-tested behavior
+
 
 ## Architecture
 
