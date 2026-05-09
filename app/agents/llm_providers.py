@@ -97,9 +97,12 @@ class GroqProvider(LLMProvider):
         if not isinstance(message, dict):
             raise LLMProviderError(f"{self.get_name()} response message format is invalid")
 
+        usage = response_json.get("usage") or {}
+        total_tokens = int(usage.get("total_tokens", 0)) if isinstance(usage, dict) else 0
+
         content = message.get("content", "")
         if isinstance(content, str):
-            return {"content": content}
+            return {"content": content, "total_tokens": total_tokens}
 
         if isinstance(content, list):
             parts: list[str] = []
@@ -110,7 +113,7 @@ class GroqProvider(LLMProvider):
                         parts.append(str(text))
                 elif isinstance(item, str):
                     parts.append(item)
-            return {"content": "\n".join(parts)}
+            return {"content": "\n".join(parts), "total_tokens": total_tokens}
 
         raise LLMProviderError(f"{self.get_name()} response content is invalid")
 
@@ -156,7 +159,8 @@ class HuggingFaceProvider(LLMProvider):
             "Content-Type": "application/json",
         }
 
-        endpoint = f"{self.api_url}/{self.model}"
+        chosen_model = (model or "").strip() or self.model
+        endpoint = f"{self.api_url}/{chosen_model}"
 
         try:
             response = requests.post(endpoint, json=payload, headers=headers, timeout=timeout_seconds)
@@ -182,7 +186,7 @@ class HuggingFaceProvider(LLMProvider):
         if not isinstance(generated_text, str):
             raise LLMProviderError(f"{self.get_name()} response missing generated_text")
 
-        return {"content": generated_text}
+        return {"content": generated_text, "total_tokens": 0}
 
 
 class JetstreamProvider(LLMProvider):
@@ -253,11 +257,14 @@ class JetstreamProvider(LLMProvider):
         if not isinstance(message, dict):
             raise LLMProviderError(f"{self.get_name()} response message format is invalid")
 
+        usage = response_json.get("usage") or {}
+        total_tokens = int(usage.get("total_tokens", 0)) if isinstance(usage, dict) else 0
+
         content = message.get("content", "")
         if not isinstance(content, str):
             raise LLMProviderError(f"{self.get_name()} response content is invalid")
 
-        return {"content": content}
+        return {"content": content, "total_tokens": total_tokens}
 
 
 def get_providers_in_order() -> list[LLMProvider]:

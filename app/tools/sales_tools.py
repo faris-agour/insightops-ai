@@ -1,13 +1,23 @@
-from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
+from app.core.cache import TTLCache
+from app.core.config import get_settings
+from app.core.logging_config import get_logger
 
-DATA_FILE = Path(__file__).resolve().parents[2] / "data" / "sales.csv"
+logger = get_logger(__name__)
+
+_settings = get_settings()
+_cache: TTLCache[pd.DataFrame] = TTLCache(ttl_seconds=_settings.DATA_CACHE_TTL_SECONDS)
 
 
-def _load_sales_data() -> pd.DataFrame:
-    sales_df = pd.read_csv(DATA_FILE)
+def _read_csv() -> pd.DataFrame:
+    data_file = _settings.SALES_DATA_PATH
+    if not data_file.exists():
+        raise FileNotFoundError(f"Sales data file not found at {data_file}")
+
+    sales_df = pd.read_csv(data_file)
 
     required_columns = {"date", "product", "region", "revenue"}
     missing_columns = required_columns.difference(sales_df.columns)
@@ -18,7 +28,23 @@ def _load_sales_data() -> pd.DataFrame:
     sales_df["date"] = pd.to_datetime(sales_df["date"], errors="coerce")
     sales_df["revenue"] = pd.to_numeric(sales_df["revenue"], errors="coerce").fillna(0)
     sales_df = sales_df.dropna(subset=["date"])
+    logger.debug("Loaded %d sales rows from %s", len(sales_df), data_file)
     return sales_df
+
+
+def load_sales_data() -> pd.DataFrame:
+    return _cache.get_or_set("sales_df", _read_csv).copy()
+
+
+def invalidate_sales_cache() -> None:
+    _cache.invalidate("sales_df")
+
+
+def get_cache_stats() -> dict[str, Any]:
+    return _cache.stats()
+
+
+_load_sales_data = load_sales_data
 
 
 def _daily_revenue(sales_df: pd.DataFrame) -> pd.DataFrame:
@@ -32,7 +58,7 @@ def _product_revenue(sales_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_sales_summary() -> dict[str, float | str]:
-    sales_df = _load_sales_data()
+    sales_df = load_sales_data()
     total_revenue = float(sales_df["revenue"].sum())
 
     daily_revenue = _daily_revenue(sales_df)
@@ -59,7 +85,7 @@ def get_sales_summary() -> dict[str, float | str]:
 
 
 def get_sales_status() -> dict[str, float | str]:
-    sales_df = _load_sales_data()
+    sales_df = load_sales_data()
     daily_revenue = _daily_revenue(sales_df)
     total_revenue = float(sales_df["revenue"].sum())
     average_daily_revenue = float(daily_revenue["revenue"].mean()) if not daily_revenue.empty else 0.0
@@ -75,11 +101,11 @@ def get_sales_status() -> dict[str, float | str]:
 
     first_day_revenue = float(daily_revenue.iloc[0]["revenue"])
     last_day_revenue = float(daily_revenue.iloc[-1]["revenue"])
-    
+
     daily_change_percent = 0.0
     if first_day_revenue > 0:
         daily_change_percent = ((last_day_revenue - first_day_revenue) / first_day_revenue) * 100
-    
+
     if first_day_revenue == 0:
         trend = "stable"
     elif last_day_revenue > first_day_revenue * 1.05:
@@ -102,7 +128,7 @@ def get_sales_status() -> dict[str, float | str]:
 
 
 def get_top_product() -> dict[str, float | str]:
-    sales_df = _load_sales_data()
+    sales_df = load_sales_data()
     product_revenue = _product_revenue(sales_df)
     if product_revenue.empty:
         return {"product": "", "revenue": 0.0, "percent_of_total_revenue": 0.0}
@@ -111,7 +137,7 @@ def get_top_product() -> dict[str, float | str]:
     top_row = product_revenue.loc[product_revenue["revenue"].idxmax()]
     top_revenue = float(top_row["revenue"])
     pct = (top_revenue / total_revenue * 100) if total_revenue > 0 else 0.0
-    
+
     return {
         "product": str(top_row["product"]),
         "revenue": round(top_revenue, 2),
@@ -120,7 +146,7 @@ def get_top_product() -> dict[str, float | str]:
 
 
 def get_worst_product() -> dict[str, float | str]:
-    sales_df = _load_sales_data()
+    sales_df = load_sales_data()
     product_revenue = _product_revenue(sales_df)
     if product_revenue.empty:
         return {"product": "", "revenue": 0.0, "percent_of_total_revenue": 0.0}
@@ -129,7 +155,7 @@ def get_worst_product() -> dict[str, float | str]:
     worst_row = product_revenue.loc[product_revenue["revenue"].idxmin()]
     worst_revenue = float(worst_row["revenue"])
     pct = (worst_revenue / total_revenue * 100) if total_revenue > 0 else 0.0
-    
+
     return {
         "product": str(worst_row["product"]),
         "revenue": round(worst_revenue, 2),
@@ -138,7 +164,7 @@ def get_worst_product() -> dict[str, float | str]:
 
 
 def get_sales_by_region() -> dict[str, object]:
-    sales_df = _load_sales_data()
+    sales_df = load_sales_data()
     region_revenue = (
         sales_df.groupby("region", as_index=False)["revenue"]
         .sum()

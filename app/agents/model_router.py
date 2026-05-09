@@ -2,8 +2,8 @@ import os
 import re
 
 
-DEFAULT_FAST_MODEL = "gpt-4o-mini"
-DEFAULT_STRONG_MODEL = "gpt-4.1"
+DEFAULT_FAST_MODEL = "llama-3.1-8b-instant"
+DEFAULT_STRONG_MODEL = "llama-3.3-70b-versatile"
 DEFAULT_STRONG_MODEL_MIN_TOKENS = 12
 DEFAULT_COMPLEXITY_KEYWORDS = {
     "compare",

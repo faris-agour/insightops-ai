@@ -178,9 +178,9 @@ class TestAgentLoop(unittest.TestCase):
 
     def test_analyze_endpoint_top_product(self) -> None:
         response = analyze(AnalyzeRequest(query="best product"))
-        self.assertEqual(response["task"], "top_product")
-        self.assertIn("product", response["result"])
-        self.assertIn("insight", response)
+        self.assertEqual(response.task, "top_product")
+        self.assertIn("product", response.result)
+        self.assertTrue(response.insight)
 
     def test_tools_return_structured_data(self) -> None:
         status = get_sales_status()
