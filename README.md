@@ -1,150 +1,196 @@
 # InsightOps AI
 
-InsightOps AI is a production-focused sales analytics API that combines deterministic analytics tools with LLM-powered intent routing.
+InsightOps AI is an agentic sales analytics backend that turns natural-language business questions into structured, explainable answers.
 
-It is designed to answer natural-language business questions with structured outputs, explainable insights, and resilient fallback behavior.
+It combines deterministic analytics from earlier versions with a resilient LLM decision layer, then adds production-focused features in v0.4 such as streaming, metrics, circuit breaker, caching, and stronger request validation.
 
-## At A Glance
+## Overview
 
-| Item | Value |
-|------|-------|
-| Current version | v0.4.0 |
-| API style | FastAPI REST + SSE streaming |
-| Domain | Sales analytics |
-| Routing strategy | LLM-first with deterministic fallback |
-| LLM providers | Groq, Hugging Face, Jetstream |
-| Reliability model | Circuit breaker + provider failover + rule fallback |
-| Performance model | TTL cache on sales dataset |
-| Observability | Metrics, structured logs, history, health checks |
+InsightOps AI processes analytics queries through a layered orchestration flow that:
 
-## Why InsightOps AI Is Different
+- Classifies intent using LLM-first routing with deterministic fallback
+- Executes specialized analytics tools on sales data
+- Generates readable insights with summary, reasoning, and recommendation
+- Tracks runtime health through metrics, logs, and history
 
-| Dimension | Typical Analytics API | InsightOps AI |
-|-----------|------------------------|---------------|
-| Query interface | Fixed endpoints per report | Natural-language entry point with multi-intent routing |
-| LLM dependency | Single model or hard failure | Multi-provider fallback plus rule-based fallback |
-| Explainability | Raw numbers only | Summary + reasoning + recommendation |
-| Real-time UX | Request/response only | SSE streaming endpoint for progressive results |
-| Reliability controls | Basic timeout only | Per-provider timeouts + circuit breaker |
-| Performance | Recompute per request | Cached data loading (TTL cache) |
-| Operations visibility | Minimal logs | Health, metrics, latency, token usage, query history |
+## Version Snapshot
 
-## Version Evolution (What You Keep + What You Gain)
+| Version | Focus | Key Additions |
+|--------|-------|---------------|
+| v0.2 | Foundation | Rule-based intent classification, 5 core sales tools, stable API responses |
+| v0.3 | Intelligence | Multi-provider LLM layer, adaptive model selection, richer insight responses |
+| v0.4 | Production Readiness | Anomaly detection, forecasting, trend analysis, SSE streaming, circuit breaker, metrics, cache, stricter validation |
 
-| Version | Main Goal | Key Features |
-|---------|-----------|--------------|
-| v0.2 | Deterministic foundation | Rule-based intent classification, 5 core tools, stable API responses |
-| v0.3 | Intelligence layer | Multi-provider LLM routing, adaptive model selection, richer insights |
-| v0.4 | Production hardening | Advanced analytics, SSE streaming, metrics, circuit breaker, caching, stricter validation |
+## v0.2 Foundation
 
-All previous strengths remain available in v0.4.
+The v0.2 release established the reliable base:
 
-## v0.4 Feature Set
+- Rule-based intent classification using keyword and pattern signals
+- Deterministic analytics tools for sales reporting and product/region analysis
+- Predictable response contract with task, result, and insight
+- FastAPI API layer with baseline test coverage
 
-| Category | Features |
-|----------|----------|
-| Advanced analytics | anomaly detection, revenue forecasting, trend analysis |
-| Routing intelligence | LLM decision layer + adaptive fast/strong model selection |
-| Resilience | Provider failover, per-provider timeout, circuit breaker, rule fallback |
-| API hardening | Request sanitization, validation, safer error handling, CORS |
-| Observability | `/health`, `/metrics`, `/history`, structured logging, token tracking |
-| Performance | Sales data TTL cache + cache invalidation endpoint |
-| Real-time | `/analyze/stream` using Server-Sent Events |
+## v0.3 Enhancements
 
-## Supported Intents
+v0.3 introduced the intelligence layer on top of v0.2:
 
-| Intent | Tool | Added In |
-|--------|------|----------|
-| sales_report | get_sales_summary | v0.2 |
-| sales_status | get_sales_status | v0.2 |
-| top_product | get_top_product | v0.2 |
-| worst_product | get_worst_product | v0.2 |
-| sales_by_region | get_sales_by_region | v0.2 |
-| anomaly_detection | detect_anomalies | v0.4 |
-| forecast_revenue | forecast_revenue | v0.4 |
-| trend_analysis | analyze_trend | v0.4 |
-| unknown | none | v0.2 |
+- LLM-assisted intent decisioning with provider failover
+- Adaptive model selection for simple vs complex queries
+- Enhanced insight quality with summary + reasoning + recommendation
+- Rule-based fallback remained active for high reliability
+
+## v0.4 Enhancements
+
+v0.4 moves the project from a strong prototype to a production-ready API baseline:
+
+- New analytics intents:
+  - anomaly_detection
+  - forecast_revenue
+  - trend_analysis
+- Reliability and resilience:
+  - provider circuit breaker
+  - per-provider timeout strategy
+  - deterministic fallback if LLM path fails
+- Observability:
+  - `/health`
+  - `/metrics`
+  - `/history`
+  - structured request logging and token usage tracking
+- Performance:
+  - TTL cache for sales dataset loading
+  - cache invalidation endpoint
+- API hardening:
+  - strict request validation and sanitization
+  - safer exception handling and standardized responses
+  - CORS support
+- Real-time support:
+  - SSE streaming endpoint `/analyze/stream`
+
+## Why This API Stands Out
+
+Compared to many analytics APIs, InsightOps AI provides:
+
+- Natural-language routing instead of many rigid report-only endpoints
+- LLM intelligence with strong fallback, not hard dependency on one model
+- Explainable output, not just raw numbers
+- Real-time streaming option for progressive user experience
+- Built-in operational visibility (health, metrics, history)
+
+## Current Architecture
+
+```text
+POST /analyze or /analyze/stream
+        ↓
+LLM Decision Layer (optional)
+        ↓ success                  ↓ fail
+ Provider + model routing      Rule-based classifier
+        ↓                          ↓
+          Task Router + Analytics Tools
+                     ↓
+       Structured Response + Insight
+                     ↓
+           Metrics + History + Logs
+```
+
+## Multi-Provider LLM Layer
+
+The LLM decision layer supports a configurable provider chain:
+
+1. Groq (primary)
+2. Hugging Face (secondary)
+3. Jetstream (tertiary)
+
+Behavior details:
+
+- Provider order controlled by `INSIGHTOPS_LLM_PROVIDER_ORDER`
+- Circuit breaker skips unstable providers temporarily
+- Each provider has its own timeout for better overall latency
+- If all providers fail, deterministic rule-based routing handles the query
+
+## Adaptive Model Selection
+
+Model routing selects between fast and strong models based on query complexity.
+
+- Fast model for short/simple intent detection
+- Strong model for complex queries (forecasting, trend, deeper analysis)
+- Thresholds and model names are configurable via environment variables
+
+## Rich Insight Responses
+
+Each final response includes:
+
+- Summary: short business headline
+- Reasoning: context behind the result
+- Recommendation: practical next action
+
+This makes the API more useful for stakeholders than plain numeric output alone.
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Service info and docs path |
-| GET | `/health` | Health status for data source and provider availability |
-| GET | `/metrics` | Runtime counters, latencies, tokens, cache stats, circuit breaker state |
-| GET | `/history` | Recent query history with task and latency |
-| POST | `/analyze` | Synchronous analysis |
-| POST | `/analyze/stream` | Streaming analysis over SSE |
-| POST | `/admin/cache/invalidate` | Invalidate sales data cache |
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/` | Service banner and version |
+| GET | `/health` | Service/data/provider health snapshot |
+| GET | `/metrics` | Counters, latency, tokens, cache, breaker state |
+| GET | `/history` | Recent analyzed queries |
+| POST | `/analyze` | Synchronous analysis response |
+| POST | `/analyze/stream` | Streaming analysis via SSE |
+| POST | `/admin/cache/invalidate` | Clear sales cache |
 
-## High-Level Request Flow
+## Example Requests / Responses
 
-1. Client sends query to `/analyze` or `/analyze/stream`.
-2. Decision layer attempts LLM intent classification.
-3. If LLM path fails, classifier falls back to deterministic rules.
-4. Matching analytics tool executes.
-5. API returns structured result plus insight text.
-6. Metrics and query history are updated.
+### Sales Report
 
-## Quick Start
+Request:
 
-### 1) Environment
-
-```bash
-cd insightops-ai
-conda env create -f environment.yml
-conda activate insightops-ai
+```json
+{ "query": "sales report" }
 ```
 
-### 2) Configure `.env`
+Response (shape):
 
-```bash
-cp .env.example .env
+```json
+{
+  "task": "sales_report",
+  "result": {
+    "total_revenue": 690383.75,
+    "average_daily_revenue": 32875.42,
+    "top_product": "Analytics Pack",
+    "worst_product": "Reporting Add-on"
+  },
+  "insight": "...",
+  "model_used": "llama-3.1-8b-instant",
+  "provider_used": "Groq",
+  "latency_ms": 420.5,
+  "api_version": "1.0"
+}
 ```
 
-Set your provider keys in `.env`:
+### Forecast Revenue
 
-- `GROQ_API_KEY`
-- `HF_API_KEY`
-- `JETSTREAM_API_KEY`
+Request:
 
-### 3) Run
-
-```bash
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
+```json
+{ "query": "forecast next week revenue" }
 ```
 
-Open docs at: `http://127.0.0.1:8010/docs`
+Response (shape):
 
-## Important Configuration
-
-| Variable | Example | Purpose |
-|----------|---------|---------|
-| INSIGHTOPS_LLM_ENABLED | true | Enable/disable LLM decision layer |
-| INSIGHTOPS_LLM_PROVIDER_ORDER | groq,huggingface,jetstream | Provider priority order |
-| INSIGHTOPS_FAST_MODEL | llama-3.1-8b-instant | Model for simple queries |
-| INSIGHTOPS_STRONG_MODEL | llama-3.3-70b-versatile | Model for complex queries |
-| INSIGHTOPS_STRONG_MODEL_MIN_TOKENS | 12 | Token threshold for strong model |
-| INSIGHTOPS_GROQ_TIMEOUT | 4 | Groq timeout in seconds |
-| INSIGHTOPS_HF_TIMEOUT | 8 | Hugging Face timeout in seconds |
-| INSIGHTOPS_JETSTREAM_TIMEOUT | 10 | Jetstream timeout in seconds |
-| INSIGHTOPS_CB_FAILURE_THRESHOLD | 3 | Circuit breaker failure threshold |
-| INSIGHTOPS_CB_COOLDOWN_SECONDS | 60 | Circuit breaker cooldown period |
-| INSIGHTOPS_DATA_CACHE_TTL_SECONDS | 300 | Sales data cache TTL |
-| INSIGHTOPS_QUERY_MAX_LENGTH | 500 | Max query length |
-| INSIGHTOPS_QUERY_HISTORY_SIZE | 100 | Max in-memory query history |
-
-## Example API Calls
-
-### Analyze (sync)
-
-```bash
-curl -X POST http://127.0.0.1:8010/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"query":"forecast next week revenue"}'
+```json
+{
+  "task": "forecast_revenue",
+  "result": {
+    "forecast": [
+      { "date": "2026-01-22", "predicted_revenue": 34407.87 }
+    ],
+    "trend_direction": "increasing"
+  },
+  "insight": "...",
+  "model_used": "llama-3.3-70b-versatile"
+}
 ```
 
-### Analyze (stream)
+### Stream Analysis (SSE)
 
 ```bash
 curl -N -X POST http://127.0.0.1:8010/analyze/stream \
@@ -152,12 +198,62 @@ curl -N -X POST http://127.0.0.1:8010/analyze/stream \
   -d '{"query":"show me anomalies"}'
 ```
 
-### Health + Metrics
+## Environment Setup
+
+### Prerequisites
+
+- Python 3.11
+- Conda (recommended)
+
+### Installation
 
 ```bash
-curl http://127.0.0.1:8010/health
-curl http://127.0.0.1:8010/metrics
+cd insightops-ai
+conda env create -f environment.yml
+conda activate insightops-ai
 ```
+
+### Configuration
+
+Create `.env` from the template:
+
+PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then set your API keys:
+
+- `GROQ_API_KEY`
+- `HF_API_KEY`
+- `JETSTREAM_API_KEY`
+
+Recommended core settings:
+
+```ini
+INSIGHTOPS_LLM_ENABLED=true
+INSIGHTOPS_LLM_PROVIDER_ORDER=groq,huggingface,jetstream
+INSIGHTOPS_FAST_MODEL=llama-3.1-8b-instant
+INSIGHTOPS_STRONG_MODEL=llama-3.3-70b-versatile
+INSIGHTOPS_STRONG_MODEL_MIN_TOKENS=12
+INSIGHTOPS_GROQ_TIMEOUT=4
+INSIGHTOPS_HF_TIMEOUT=8
+INSIGHTOPS_JETSTREAM_TIMEOUT=10
+INSIGHTOPS_CB_FAILURE_THRESHOLD=3
+INSIGHTOPS_CB_COOLDOWN_SECONDS=60
+INSIGHTOPS_DATA_CACHE_TTL_SECONDS=300
+```
+
+### Run API
+
+```bash
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
+```
+
+Swagger docs:
+
+- http://127.0.0.1:8010/docs
 
 ## Testing
 
@@ -165,14 +261,10 @@ curl http://127.0.0.1:8010/metrics
 python -m unittest discover -s tests -p "test_*.py"
 ```
 
-| Coverage Area | Status |
-|---------------|--------|
-| Core agent loop and fallback behavior | covered |
-| LLM orchestration and provider ordering | covered |
-| Sales tools output contracts | covered |
-| v0.4 analytics, cache, breaker, metrics, history | covered |
+Current baseline:
 
-Baseline: 30 tests.
+- 30 tests
+- Coverage for agent loop, provider routing, tool contracts, and v0.4 features
 
 ## Project Structure
 
@@ -209,15 +301,6 @@ insightops-ai/
 ├── GETTING_STARTED.md
 └── README.md
 ```
-
-## Enterprise Next Steps
-
-- Add authentication and authorization.
-- Add rate limiting.
-- Add persistent storage (for history and reporting).
-- Add distributed cache (Redis) for scale-out deployments.
-- Add Prometheus/Grafana integration.
-- Add CI/CD deployment hardening.
 
 ## License
 
