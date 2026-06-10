@@ -267,6 +267,48 @@ class JetstreamProvider(LLMProvider):
         return {"content": content, "total_tokens": total_tokens}
 
 
+class MockLLMProvider(LLMProvider):
+    """Deterministic offline provider.
+
+    Serves as a final fallback so the LLM decision path works without any API
+    keys — useful for demos, tests, and CI. It reuses the rule-based classifier
+    to produce a valid intent-router JSON payload and a token estimate, so the
+    full observability pipeline (tokens, cost, traces) stays exercised offline.
+    """
+
+    MODEL_NAME = "mock-llm"
+
+    def is_configured(self) -> bool:
+        return True
+
+    def get_name(self) -> str:
+        return "Mock"
+
+    def send_decision_request(
+        self, query: str, system_prompt: str, model: str, timeout_seconds: float
+    ) -> dict[str, Any]:
+        # Lazy import avoids a circular import (simple_agent -> llm_decision -> here).
+        from app.agents.simple_agent import classify_task
+
+        intent = classify_task(query)
+        payload = {
+            "intent": intent,
+            "reasoning": "Deterministic offline classification (mock provider).",
+            "suggested_tool": "",
+        }
+        estimated_tokens = max(1, len(query.split()) + len(system_prompt.split()) // 4)
+        return {
+            "content": json.dumps(payload),
+            "total_tokens": estimated_tokens,
+            "model": self.MODEL_NAME,
+        }
+
+
+def _mock_enabled() -> bool:
+    raw = os.getenv("INSIGHTOPS_LLM_MOCK_ENABLED", "true").strip().lower()
+    return raw in {"1", "true", "yes", "on", ""}
+
+
 def get_providers_in_order() -> list[LLMProvider]:
     default_order = "groq,huggingface,jetstream"
     provider_order = os.getenv("INSIGHTOPS_LLM_PROVIDER_ORDER", default_order).strip() or default_order
@@ -286,5 +328,9 @@ def get_providers_in_order() -> list[LLMProvider]:
 
     if not providers:
         providers = [GroqProvider(), HuggingFaceProvider(), JetstreamProvider()]
+
+    # Mock provider is always last, so configured real providers are preferred.
+    if _mock_enabled():
+        providers.append(MockLLMProvider())
 
     return providers

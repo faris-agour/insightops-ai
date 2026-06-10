@@ -59,6 +59,7 @@ class Settings:
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
     LOG_LEVEL = _env_str("INSIGHTOPS_LOG_LEVEL", "INFO").upper()
+    JSON_LOGS = _env_bool("INSIGHTOPS_JSON_LOGS", default=False)
 
     SALES_DATA_PATH = Path(
         _env_str("INSIGHTOPS_SALES_DATA_PATH", str(PROJECT_ROOT / "data" / "sales.csv"))
@@ -69,6 +70,10 @@ class Settings:
     LLM_ENABLED = _env_bool("INSIGHTOPS_LLM_ENABLED", default=False)
     LLM_TIMEOUT_SECONDS = _env_float("INSIGHTOPS_LLM_TIMEOUT_SECONDS", 5.0)
     LLM_PROVIDER_ORDER = _env_str("INSIGHTOPS_LLM_PROVIDER_ORDER", "groq,huggingface,jetstream")
+
+    # When enabled, a deterministic mock provider serves as a final fallback so the
+    # LLM path works offline (no API keys) for demos, tests, and CI.
+    LLM_MOCK_ENABLED = _env_bool("INSIGHTOPS_LLM_MOCK_ENABLED", default=True)
 
     PROVIDER_TIMEOUTS = {
         "groq": _env_float("INSIGHTOPS_GROQ_TIMEOUT", 4.0),

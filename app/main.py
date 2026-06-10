@@ -4,20 +4,22 @@ import time
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 
 from app.agents.llm_decision import get_circuit_breaker_state
 from app.agents.llm_providers import get_providers_in_order
+from app.agents.prompts import get_prompt_registry
 from app.agents.simple_agent import run_agent
 from app.core.config import get_settings
 from app.core.logging_config import configure_logging, get_logger
 from app.core.metrics import get_metrics
+from app.core.tracing import get_trace_store
 from app.schemas import AnalyzeRequest, AnalyzeResponse, HealthStatus
 from app.services.query_history import get_history
 from app.tools.sales_tools import get_cache_stats, invalidate_sales_cache, load_sales_data
 
 settings = get_settings()
-configure_logging(settings.LOG_LEVEL)
+configure_logging(settings.LOG_LEVEL, json_logs=settings.JSON_LOGS)
 logger = get_logger(__name__)
 
 app = FastAPI(
@@ -115,6 +117,30 @@ def metrics() -> dict[str, object]:
     return snapshot
 
 
+@app.get("/metrics/prometheus")
+def metrics_prometheus() -> PlainTextResponse:
+    return PlainTextResponse(_metrics.prometheus(), media_type="text/plain; version=0.0.4")
+
+
+@app.get("/traces")
+def traces(limit: int = 20) -> dict[str, object]:
+    limit = max(1, min(limit, 100))
+    return {"traces": get_trace_store().recent(limit=limit)}
+
+
+@app.get("/traces/{trace_id}")
+def trace_detail(trace_id: str) -> dict[str, object]:
+    trace = get_trace_store().get(trace_id)
+    if trace is None:
+        raise HTTPException(status_code=404, detail="trace not found")
+    return trace.to_dict()
+
+
+@app.get("/prompts")
+def prompts() -> dict[str, object]:
+    return {"prompts": get_prompt_registry().list_ids()}
+
+
 @app.get("/history")
 def history(limit: int = 20) -> dict[str, object]:
     limit = max(1, min(limit, 100))
@@ -144,6 +170,9 @@ def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
         model_used=str(result.get("model_used", "rule-based-fallback")),
         provider_used=result.get("provider_used"),
         latency_ms=float(result.get("latency_ms", 0.0)),
+        trace_id=result.get("trace_id"),
+        tokens=int(result.get("tokens", 0) or 0),
+        cost_usd=float(result.get("cost_usd", 0.0) or 0.0),
     )
     _history.add(
         query=request.query,

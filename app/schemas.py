@@ -36,6 +36,9 @@ class AnalyzeResponse(BaseModel):
     model_used: str
     provider_used: str | None = None
     latency_ms: float
+    trace_id: str | None = None
+    tokens: int = 0
+    cost_usd: float = 0.0
     cached: bool = False
     api_version: str = "1.0"
 

@@ -7,6 +7,8 @@ from app.analysis.advanced_analytics import (
     detect_anomalies,
     forecast_revenue,
 )
+from app.core import tracing
+from app.core.guardrails import redact_pii, scan_input
 from app.core.logging_config import get_logger
 from app.core.metrics import get_metrics
 from app.tools.sales_tools import (
@@ -224,39 +226,75 @@ TASK_HANDLERS = {
 
 def run_agent(query: str) -> dict[str, object]:
     started = time.perf_counter()
+    trace = tracing.start_trace(query)
     task: str
     model_used: str = "rule-based-fallback"
     provider_used: str | None = None
+    tokens = 0
+    cost_usd = 0.0
 
-    try:
-        llm_decision = decide_with_llm(query)
-        task = llm_decision["intent"]
-        model_used = llm_decision.get("model_used", "rule-based-fallback")
-        provider_used = llm_decision.get("provider_used")
-    except LLMDecisionError as exc:
-        logger.info("LLM unavailable, falling back to rules: %s", exc)
-        task = classify_task(query)
-    except Exception as exc:
-        logger.exception("Unexpected error in LLM decision, falling back to rules: %s", exc)
-        task = classify_task(query)
+    with tracing.span("guardrails") as guard_span:
+        guard = scan_input(query)
+        guard_span.attributes["flagged"] = guard.flagged
+        if guard.flagged:
+            guard_span.attributes["reasons"] = guard.reasons
+            _metrics.record_guardrail_flag()
+            logger.warning(
+                "Guardrail flagged query '%s': %s", redact_pii(query), guard.reasons
+            )
+
+    with tracing.span("decision") as decision_span:
+        try:
+            llm_decision = decide_with_llm(query)
+            task = llm_decision["intent"]
+            model_used = llm_decision.get("model_used", "rule-based-fallback")
+            provider_used = llm_decision.get("provider_used")
+            tokens = int(llm_decision.get("tokens", "0") or 0)
+            cost_usd = float(llm_decision.get("cost_usd", "0") or 0.0)
+            decision_span.attributes["path"] = "llm"
+        except LLMDecisionError as exc:
+            logger.info("LLM unavailable, falling back to rules: %s", exc)
+            task = classify_task(query)
+            decision_span.attributes["path"] = "rule_based"
+        except Exception as exc:
+            logger.exception("Unexpected error in LLM decision, falling back to rules: %s", exc)
+            task = classify_task(query)
+            decision_span.attributes["path"] = "rule_based"
+        decision_span.attributes["task"] = task
 
     handler = TASK_HANDLERS.get(task)
-    try:
-        result: dict[str, object] = handler() if handler else {}
-    except Exception as exc:
-        logger.exception("Tool handler %s failed: %s", task, exc)
-        result = {"error": "tool_execution_failed"}
+    with tracing.span("tool_execution", tool=getattr(handler, "__name__", "none")):
+        try:
+            result: dict[str, object] = handler() if handler else {}
+        except Exception as exc:
+            logger.exception("Tool handler %s failed: %s", task, exc)
+            result = {"error": "tool_execution_failed"}
+
+    with tracing.span("insight"):
+        insight = build_insight(task, result)
 
     latency_ms = (time.perf_counter() - started) * 1000.0
     _metrics.record_latency(latency_ms)
     _metrics.increment(f"task.{task}")
     _metrics.increment("requests.total")
 
+    tracing.finish_trace(
+        trace,
+        task=task,
+        model_used=model_used,
+        provider_used=provider_used,
+        latency_ms=round(latency_ms, 2),
+        guardrail_flagged=guard.flagged,
+    )
+
     return {
         "task": task,
         "result": result,
-        "insight": build_insight(task, result),
+        "insight": insight,
         "model_used": model_used,
         "provider_used": provider_used,
         "latency_ms": round(latency_ms, 2),
+        "trace_id": trace.trace_id,
+        "tokens": tokens,
+        "cost_usd": round(cost_usd, 6),
     }
