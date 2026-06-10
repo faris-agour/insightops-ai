@@ -1,10 +1,12 @@
 import asyncio
 import json
 import time
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.agents.consensus import run_consensus_analysis
 from app.agents.llm_decision import get_circuit_breaker_state
@@ -68,12 +70,22 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
-@app.get("/")
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def dashboard() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/api")
 def read_root() -> dict[str, str]:
     return {
         "message": f"{settings.APP_NAME} is running",
         "version": settings.APP_VERSION,
         "docs": "/docs",
+        "dashboard": "/",
     }
 
 

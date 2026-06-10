@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsightOps AI — Agentic Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo">IO</div>
+      <div>
+        <h1>InsightOps AI</h1>
+        <p>Agentic sales analytics · multi-agent consensus · LLMOps</p>
+      </div>
+    </div>
+    <div class="pill"><span id="health-dot" class="dot"></span><span id="health-text">checking…</span></div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab active" data-tab="analyze">⚡ Single Analysis</button>
+      <button class="tab" data-tab="consensus">🤝 Multi-Agent Consensus</button>
+      <button class="tab" data-tab="stream">📡 Live Stream</button>
+      <button class="tab" data-tab="metrics">📊 Observability</button>
+    </div>
+
+    <!-- ANALYZE -->
+    <section class="panel active" id="panel-analyze">
+      <div class="query-bar">
+        <input id="q-analyze" placeholder="Ask a sales question, e.g. 'how are sales trending?'" />
+        <button class="primary" id="btn-analyze">Analyze</button>
+      </div>
+      <div class="chips" id="chips-analyze"></div>
+      <div id="analyze-out"><div class="empty">Ask a question to see an explainable insight.</div></div>
+    </section>
+
+    <!-- CONSENSUS -->
+    <section class="panel" id="panel-consensus">
+      <div class="query-bar">
+        <input id="q-consensus" placeholder="Ask for an outlook, e.g. 'what is the sales outlook and the risks?'" />
+        <button class="primary" id="btn-consensus">Run Panel</button>
+      </div>
+      <p class="muted" style="margin-top:-6px;font-size:13px">
+        Three specialized agents (Trend · Risk · Forecast) analyze independently, then a Reconciler
+        synthesizes one verdict and flags conflicts.
+      </p>
+      <div id="consensus-out"><div class="empty">Run the panel to see collaborative multi-agent reasoning.</div></div>
+    </section>
+
+    <!-- STREAM -->
+    <section class="panel" id="panel-stream">
+      <div class="query-bar">
+        <input id="q-stream" placeholder="Stream an analysis token-by-token (SSE)…" />
+        <button class="primary" id="btn-stream">Stream</button>
+      </div>
+      <div class="stream-log" id="stream-log"><span class="muted">Server-Sent Events will appear here…</span></div>
+    </section>
+
+    <!-- METRICS -->
+    <section class="panel" id="panel-metrics">
+      <div class="grid cols-4" id="metric-cards"></div>
+      <div class="grid cols-2" style="margin-top:16px">
+        <div class="card">
+          <h3>Latency distribution (ms)</h3>
+          <canvas id="chart-latency" height="150"></canvas>
+        </div>
+        <div class="card">
+          <h3>Provider calls</h3>
+          <canvas id="chart-providers" height="150"></canvas>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Circuit breaker & cache</h3>
+        <div class="kv" id="cb-kv"></div>
+      </div>
+      <p class="muted" style="font-size:12px;margin-top:10px">Auto-refreshes every 4s · <a href="/metrics" target="_blank">/metrics</a> · <a href="/metrics/prometheus" target="_blank">/metrics/prometheus</a> · <a href="/docs" target="_blank">/docs</a></p>
+    </section>
+  </main>
+
+  <footer>
+    InsightOps AI · <a href="/docs">API docs</a> · <a href="/api">service banner</a> · built with FastAPI
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
