@@ -43,6 +43,31 @@ class AnalyzeResponse(BaseModel):
     api_version: str = "1.0"
 
 
+class AgentFindingModel(BaseModel):
+    agent: str
+    role: str
+    insight: str
+    confidence: float
+    source: str
+    evidence: dict[str, Any]
+
+
+class ReconciledModel(BaseModel):
+    insight: str
+    confidence: float
+    conflicts: list[str]
+    source: str
+
+
+class ConsensusResponse(BaseModel):
+    query: str
+    agent_count: int
+    findings: list[AgentFindingModel]
+    reconciled: ReconciledModel
+    trace_id: str | None = None
+    api_version: str = "1.0"
+
+
 class LLMDecisionPayload(BaseModel):
     intent: VALID_INTENTS
     reasoning: str = Field(default="Intent inferred from query context.", max_length=2000)

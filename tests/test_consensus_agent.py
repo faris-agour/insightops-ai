@@ -1,12 +1,10 @@
+"""Backward-compatibility tests for the legacy run_consensus shim."""
+
 from app.agents.consensus_agent import run_consensus
 
-def test_consensus():
-    query = "How are sales doing this year?"
-    result = run_consensus(query)
-    print(f"Query: {query}")
-    print(f"Result: {result}")
-    assert "Reconciled Insight" in result
-    print("Test passed successfully!")
 
-if __name__ == "__main__":
-    test_consensus()
+def test_run_consensus_returns_reconciled_string() -> None:
+    result = run_consensus("How are sales doing this year?")
+    assert isinstance(result, str)
+    assert "Reconciled Insight" in result
+    assert len(result) > 30

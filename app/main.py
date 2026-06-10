@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 
+from app.agents.consensus import run_consensus_analysis
 from app.agents.llm_decision import get_circuit_breaker_state
 from app.agents.llm_providers import get_providers_in_order
 from app.agents.prompts import get_prompt_registry
@@ -14,7 +15,7 @@ from app.core.config import get_settings
 from app.core.logging_config import configure_logging, get_logger
 from app.core.metrics import get_metrics
 from app.core.tracing import get_trace_store
-from app.schemas import AnalyzeRequest, AnalyzeResponse, HealthStatus
+from app.schemas import AnalyzeRequest, AnalyzeResponse, ConsensusResponse, HealthStatus
 from app.services.query_history import get_history
 from app.tools.sales_tools import get_cache_stats, invalidate_sales_cache, load_sales_data
 
@@ -181,6 +182,24 @@ def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
         latency_ms=response.latency_ms,
     )
     return response
+
+
+@app.post("/analyze/consensus", response_model=ConsensusResponse)
+def analyze_consensus(request: AnalyzeRequest) -> ConsensusResponse:
+    """Run the multi-agent consensus pipeline (trend + risk + forecast -> reconciler)."""
+    try:
+        result = run_consensus_analysis(request.query)
+    except FileNotFoundError as exc:
+        logger.error("Sales data missing: %s", exc)
+        raise HTTPException(status_code=503, detail="Sales data source unavailable") from exc
+
+    _history.add(
+        query=request.query,
+        task="consensus",
+        model_used=result["reconciled"]["source"],
+        latency_ms=0.0,
+    )
+    return ConsensusResponse(**result)
 
 
 @app.post("/analyze/stream")
