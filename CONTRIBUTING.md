@@ -5,7 +5,7 @@ Thanks for your interest in improving InsightOps AI! This guide gets you product
 ## Development setup
 
 ```bash
-git clone https://github.com/farisabouagour/insightops-ai.git
+git clone https://github.com/faris-agour/insightops-ai.git
 cd insightops-ai
 pip install -r requirements-dev.txt
 pip install -e .

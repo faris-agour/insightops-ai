@@ -4,7 +4,7 @@
 
 ### Agentic sales-analytics platform — multi-agent consensus, resilient LLM routing, and first-class LLMOps.
 
-[![CI](https://github.com/farisabouagour/insightops-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/farisabouagour/insightops-ai/actions/workflows/ci.yml)
+[![CI](https://github.com/faris-agour/insightops-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/faris-agour/insightops-ai/actions/workflows/ci.yml)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230?logo=ruff&logoColor=white)](https://docs.astral.sh/ruff/)
@@ -128,7 +128,7 @@ $ python -m app.eval.run
 ### Option A — pip
 
 ```bash
-git clone https://github.com/farisabouagour/insightops-ai.git
+git clone https://github.com/faris-agour/insightops-ai.git
 cd insightops-ai
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8010

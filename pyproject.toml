@@ -39,8 +39,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/farisabouagour/insightops-ai"
-Repository = "https://github.com/farisabouagour/insightops-ai"
+Homepage = "https://github.com/faris-agour/insightops-ai"
+Repository = "https://github.com/faris-agour/insightops-ai"
 
 [tool.setuptools.packages.find]
 include = ["app*"]
