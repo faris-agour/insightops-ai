@@ -1,157 +1,90 @@
 # Getting Started
 
-This guide explains how to set up and run InsightOps AI locally.
+This guide gets InsightOps AI running locally in a couple of minutes. It runs **fully offline**
+(no API keys) thanks to the built-in mock LLM provider.
 
-## Installation
+## Prerequisites
 
-### Prerequisites
-- Python 3.10+ (3.11 recommended)
-- conda or compatible package manager
+- Python **3.11**
+- pip, conda, **or** Docker
 
-### Step 1: Create Environment
+## 1. Install & run
 
-Using conda:
+### pip
+
 ```bash
-cd insightops-ai
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
+```
+
+### conda
+
+```bash
 conda env create -f environment.yml
 conda activate insightops-ai
+uvicorn app.main:app --reload --port 8010
 ```
 
-If you encounter conda solver issues, use the classic solver:
+### Docker
+
 ```bash
-conda config --set solver classic
-conda env create -f environment.yml
+docker compose up --build
 ```
 
-Alternatively, use an existing environment (if available):
+## 2. Open it
+
+- 🎨 Dashboard → <http://127.0.0.1:8010/>
+- 📚 Swagger → <http://127.0.0.1:8010/docs>
+- 📊 Metrics → <http://127.0.0.1:8010/metrics>
+
+## 3. Try the API
+
+Single analysis:
+
 ```bash
-conda activate cliniq
-```
-
-### Step 2: Verify Installation
-
-Run the tests to ensure everything is set up:
-```bash
-python -m unittest discover -s tests -p "test_*.py"
-```
-
-Expected output:
-```
-Ran 7 tests in 0.003s
-OK
-```
-
-## Running the API
-
-Start the FastAPI development server:
-```bash
-uvicorn app.main:app --reload
-```
-
-Server runs at: `http://127.0.0.1:8000`
-
-### Test the Endpoint
-
-#### Using curl
-```bash
-curl -X POST http://127.0.0.1:8000/analyze \
+curl -X POST http://127.0.0.1:8010/analyze \
   -H "Content-Type: application/json" \
-  -d '{"query":"analyze sales"}'
+  -d '{"query":"how are sales trending?"}'
 ```
 
-#### Using Python requests
-```python
-import requests
+Multi-agent consensus:
 
-response = requests.post(
-    "http://127.0.0.1:8000/analyze",
-    json={"query": "analyze sales"}
-)
-print(response.json())
-```
-
-#### Expected Response
-```json
-{
-  "task": "sales_analysis",
-  "result": {
-    "total_revenue": 690383.75,
-    "average_daily_revenue": 32875.42,
-    "top_product": "Analytics Pack",
-    "worst_product": "Reporting Add-on"
-  },
-  "insight": "Sales are stable overall with Analytics Pack leading performance, while Reporting Add-on shows weaker results."
-}
-```
-
-## API Endpoints
-
-### GET /
-Health check endpoint.
-- Returns: `{"message": "InsightOps AI is running"}`
-
-### POST /analyze
-Main analysis endpoint. Classifies query intent and executes matching tool.
-- Request body:
-  ```json
-  {
-    "query": "string"
-  }
-  ```
-- Response:
-  ```json
-  {
-    "task": "string",
-    "result": "object",
-    "insight": "string"
-  }
-  ```
-
-## Project Structure
-
-```
-insightops-ai/
-├── app/
-│   ├── main.py                 # FastAPI entrypoint and endpoints
-│   ├── agents/
-│   │   └── simple_agent.py    # Task classifier and agent loop
-│   ├── tools/
-│   │   └── sales_tools.py     # Tool implementations
-│   └── __init__.py
-├── docs/
-│   └── screenshots/           # Placeholder request output screenshots
-├── data/
-│   ├── sales.csv              # Synthetic sales dataset
-│   └── generate_sales_data.py # Dataset generator script
-├── tests/
-│   ├── test_agent_loop.py     # Unit tests
-│   └── README.md              # Test documentation
-├── environment.yml            # Conda dependencies
-└── README.md                  # Project overview
-```
-
-## Development Workflow
-
-1. Create or modify code in `app/` directories
-2. Write tests in `tests/` directory
-3. Run tests: `python -m unittest discover -s tests -p "test_*.py"`
-4. Start dev server: `uvicorn app.main:app --reload`
-5. Test endpoints with curl or Python client
-6. Commit and push to GitHub
-
-## Common Issues
-
-### Conda Environment Not Found
 ```bash
-conda config --set solver classic
-conda env create -f environment.yml
+curl -X POST http://127.0.0.1:8010/analyze/consensus \
+  -H "Content-Type: application/json" \
+  -d '{"query":"what is the outlook and the risks?"}'
 ```
 
-### Module Import Errors
-Ensure you're in the project root directory (`insightops-ai/`) before running commands.
+The response includes a `trace_id` — inspect the full span breakdown at
+`GET /traces/{trace_id}`.
 
-### Port 8000 Already in Use
-Run on a different port:
+## 4. Enable real LLMs (optional)
+
 ```bash
-uvicorn app.main:app --reload --port 8001
+cp .env.example .env        # PowerShell: Copy-Item .env.example .env
+# then set in .env:
+#   INSIGHTOPS_LLM_ENABLED=true
+#   GROQ_API_KEY=...   (and/or HF_API_KEY / JETSTREAM_API_KEY)
 ```
+
+With keys present, the decision layer and every agent upgrade from deterministic
+narratives to real LLM reasoning. Without keys, the mock provider keeps everything working.
+
+## 5. Development workflow
+
+```bash
+pip install -r requirements-dev.txt
+make check        # ruff + mypy + pytest + eval (the full CI gate)
+make test         # just the tests
+make eval         # intent-classification accuracy report
+make run          # dev server with reload
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions and
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the design deep-dive.
+
+## Troubleshooting
+
+- **Port already in use** → change `--port 8010` to another value.
+- **Import errors** → run commands from the project root (`insightops-ai/`).
+- **`uvicorn` not found** → `pip install -r requirements.txt` (or activate the conda env).

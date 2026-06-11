@@ -1,307 +1,247 @@
-# InsightOps AI
+<div align="center">
 
-InsightOps AI is an agentic sales analytics backend that turns natural-language business questions into structured, explainable answers.
+# 🧠 InsightOps AI
 
-It combines deterministic analytics from earlier versions with a resilient LLM decision layer, then adds production-focused features in v0.4 such as streaming, metrics, circuit breaker, caching, and stronger request validation.
+### Agentic sales-analytics platform — multi-agent consensus, resilient LLM routing, and first-class LLMOps.
 
-## Overview
+[![CI](https://github.com/farisabouagour/insightops-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/farisabouagour/insightops-ai/actions/workflows/ci.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230?logo=ruff&logoColor=white)](https://docs.astral.sh/ruff/)
+[![Typed: mypy](https://img.shields.io/badge/types-mypy-2A6DB2)](https://mypy.readthedocs.io/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-InsightOps AI processes analytics queries through a layered orchestration flow that:
+*Turn a natural-language business question into a structured, explainable, fully-traced answer —
+or convene a panel of specialized AI agents to debate it and reach consensus.*
 
-- Classifies intent using LLM-first routing with deterministic fallback
-- Executes specialized analytics tools on sales data
-- Generates readable insights with summary, reasoning, and recommendation
-- Tracks runtime health through metrics, logs, and history
+</div>
 
-## Version Snapshot
+---
 
-| Version | Focus | Key Additions |
-|--------|-------|---------------|
-| v0.2 | Foundation | Rule-based intent classification, 5 core sales tools, stable API responses |
-| v0.3 | Intelligence | Multi-provider LLM layer, adaptive model selection, richer insight responses |
-| v0.4 | Production Readiness | Anomaly detection, forecasting, trend analysis, SSE streaming, circuit breaker, metrics, cache, stricter validation |
+## ✨ Why this project stands out
 
-## v0.2 Foundation
+Most analytics APIs return numbers. **InsightOps AI returns reasoning you can trust and observe.**
 
-The v0.2 release established the reliable base:
+- 🤝 **Multi-agent consensus** — three specialized agents (Trend, Risk, Forecast) analyze
+  independently, then a **Reconciler** synthesizes one verdict and *flags conflicts* between optimism and risk.
+- 🛰️ **LLMOps built-in** — per-request tracing, versioned prompts, guardrails, token-cost tracking,
+  an eval harness, and Prometheus metrics. Not bolted on — part of the request path.
+- 🛡️ **Resilient by design** — multi-provider LLM chain (Groq → Hugging Face → Jetstream) with a
+  circuit breaker, per-provider timeouts, and a **deterministic fallback that never fails**.
+- 🔌 **Runs anywhere, instantly** — a built-in **mock LLM provider** means the whole pipeline (agents
+  included) works offline with **zero API keys**. Add keys to upgrade to real reasoning.
+- 🎨 **Interactive dashboard** — a zero-build single-page app with live SSE streaming, the agent
+  panel, and an auto-refreshing observability view. Open `/` and demo it.
 
-- Rule-based intent classification using keyword and pattern signals
-- Deterministic analytics tools for sales reporting and product/region analysis
-- Predictable response contract with task, result, and insight
-- FastAPI API layer with baseline test coverage
+> ⚡ **30-second demo:** `pip install -r requirements.txt && uvicorn app.main:app --port 8010` → open <http://127.0.0.1:8010>
 
-## v0.3 Enhancements
+---
 
-v0.3 introduced the intelligence layer on top of v0.2:
+## 🏗️ Architecture at a glance
 
-- LLM-assisted intent decisioning with provider failover
-- Adaptive model selection for simple vs complex queries
-- Enhanced insight quality with summary + reasoning + recommendation
-- Rule-based fallback remained active for high reliability
+```mermaid
+flowchart TD
+    UI["Dashboard / API client"] -->|/analyze| API[FastAPI]
+    UI -->|/analyze/consensus| API
+    UI -->|/analyze/stream · SSE| API
+    API --> GR[Guardrails]
+    GR --> DEC{LLM Decision Layer}
+    DEC -->|success| ROUTE[Intent + model routing]
+    DEC -->|all fail| RULES[Rule-based fallback]
+    ROUTE --> TOOLS[Analytics tools]
+    RULES --> TOOLS
+    TOOLS --> RESP[Structured + explainable response]
+    API -.-> OBS[(Trace · Metrics · Cost · History)]
+```
 
-## v0.4 Enhancements
+Full diagrams (consensus flow, provider chain, module map) live in
+**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
-v0.4 moves the project from a strong prototype to a production-ready API baseline:
+---
 
-- New analytics intents:
-  - anomaly_detection
-  - forecast_revenue
-  - trend_analysis
-- Reliability and resilience:
-  - provider circuit breaker
-  - per-provider timeout strategy
-  - deterministic fallback if LLM path fails
-- Observability:
-  - `/health`
-  - `/metrics`
-  - `/history`
-  - structured request logging and token usage tracking
-- Performance:
-  - TTL cache for sales dataset loading
-  - cache invalidation endpoint
-- API hardening:
-  - strict request validation and sanitization
-  - safer exception handling and standardized responses
-  - CORS support
-- Real-time support:
-  - SSE streaming endpoint `/analyze/stream`
+## 🤝 Multi-agent consensus
 
-## Why This API Stands Out
+```mermaid
+flowchart LR
+    Q[Query] --> ORC[Orchestrator]
+    ORC --> TA[Trend Analyst]
+    ORC --> RA[Risk Assessor]
+    ORC --> FS[Forecasting Specialist]
+    TA --> WS[(Consensus Workspace)]
+    RA --> WS
+    FS --> WS
+    WS --> REC[Reconciler]
+    REC --> V[Verdict + conflicts + confidence]
+```
 
-Compared to many analytics APIs, InsightOps AI provides:
+```bash
+curl -s -X POST http://127.0.0.1:8010/analyze/consensus \
+  -H "Content-Type: application/json" \
+  -d '{"query":"what is the outlook and the risks?"}'
+```
 
-- Natural-language routing instead of many rigid report-only endpoints
-- LLM intelligence with strong fallback, not hard dependency on one model
-- Explainable output, not just raw numbers
-- Real-time streaming option for progressive user experience
-- Built-in operational visibility (health, metrics, history)
+```jsonc
+{
+  "agent_count": 3,
+  "findings": [
+    { "agent": "Trend Analyst",          "role": "trend",    "source": "llm", "confidence": 0.68, "insight": "Momentum is heading downwards…" },
+    { "agent": "Risk Assessor",          "role": "risk",     "source": "llm", "confidence": 0.74, "insight": "Potential revenue spike on 2026-01-17…" },
+    { "agent": "Forecasting Specialist", "role": "forecast", "source": "llm", "confidence": 0.90, "insight": "Revenue expected to keep increasing…" }
+  ],
+  "reconciled": {
+    "source": "llm",
+    "confidence": 0.73,
+    "insight": "Momentum is softening, but an anomalous spike may offset it while the forecast stays positive…",
+    "conflicts": ["Optimistic forecast coexists with detected anomalies — growth may be fragile."]
+  },
+  "trace_id": "a1b2c3d4e5f6a7b8"
+}
+```
 
-## Current Architecture
+Each agent uses a real LLM when keys are present and a deterministic narrative otherwise — so this
+endpoint **always works**, online or offline.
+
+---
+
+## 🛰️ LLMOps & observability
+
+| Capability | What you get | Endpoint / entry point |
+|---|---|---|
+| **Tracing** | `trace_id` + timed spans per request | `GET /traces`, `GET /traces/{id}` |
+| **Prompt registry** | versioned, centralized prompts | `GET /prompts` |
+| **Guardrails** | prompt-injection screening + PII redaction in logs | automatic |
+| **Cost tracking** | per-model token cost estimate | `GET /metrics` → `llm_cost_usd` |
+| **Metrics** | counters, p50/p95 latency, tokens, breaker, cache | `GET /metrics`, `GET /metrics/prometheus` |
+| **Evaluation** | golden-set accuracy gate (CI-enforced) | `python -m app.eval.run` |
+| **Structured logs** | single-line JSON for aggregation | `INSIGHTOPS_JSON_LOGS=true` |
 
 ```text
-POST /analyze or /analyze/stream
-        ↓
-LLM Decision Layer (optional)
-        ↓ success                  ↓ fail
- Provider + model routing      Rule-based classifier
-        ↓                          ↓
-          Task Router + Analytics Tools
-                     ↓
-       Structured Response + Insight
-                     ↓
-           Metrics + History + Logs
+$ python -m app.eval.run
+ Accuracy : 100.0%  (26/26)
+   anomaly_detection   3/3 (100%)   forecast_revenue   3/3 (100%)   …
 ```
 
-## Multi-Provider LLM Layer
+---
 
-The LLM decision layer supports a configurable provider chain:
+## 🚀 Quickstart
 
-1. Groq (primary)
-2. Hugging Face (secondary)
-3. Jetstream (tertiary)
-
-Behavior details:
-
-- Provider order controlled by `INSIGHTOPS_LLM_PROVIDER_ORDER`
-- Circuit breaker skips unstable providers temporarily
-- Each provider has its own timeout for better overall latency
-- If all providers fail, deterministic rule-based routing handles the query
-
-## Adaptive Model Selection
-
-Model routing selects between fast and strong models based on query complexity.
-
-- Fast model for short/simple intent detection
-- Strong model for complex queries (forecasting, trend, deeper analysis)
-- Thresholds and model names are configurable via environment variables
-
-## Rich Insight Responses
-
-Each final response includes:
-
-- Summary: short business headline
-- Reasoning: context behind the result
-- Recommendation: practical next action
-
-This makes the API more useful for stakeholders than plain numeric output alone.
-
-## API Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/` | Service banner and version |
-| GET | `/health` | Service/data/provider health snapshot |
-| GET | `/metrics` | Counters, latency, tokens, cache, breaker state |
-| GET | `/history` | Recent analyzed queries |
-| POST | `/analyze` | Synchronous analysis response |
-| POST | `/analyze/stream` | Streaming analysis via SSE |
-| POST | `/admin/cache/invalidate` | Clear sales cache |
-
-## Example Requests / Responses
-
-### Sales Report
-
-Request:
-
-```json
-{ "query": "sales report" }
-```
-
-Response (shape):
-
-```json
-{
-  "task": "sales_report",
-  "result": {
-    "total_revenue": 690383.75,
-    "average_daily_revenue": 32875.42,
-    "top_product": "Analytics Pack",
-    "worst_product": "Reporting Add-on"
-  },
-  "insight": "...",
-  "model_used": "llama-3.1-8b-instant",
-  "provider_used": "Groq",
-  "latency_ms": 420.5,
-  "api_version": "1.0"
-}
-```
-
-### Forecast Revenue
-
-Request:
-
-```json
-{ "query": "forecast next week revenue" }
-```
-
-Response (shape):
-
-```json
-{
-  "task": "forecast_revenue",
-  "result": {
-    "forecast": [
-      { "date": "2026-01-22", "predicted_revenue": 34407.87 }
-    ],
-    "trend_direction": "increasing"
-  },
-  "insight": "...",
-  "model_used": "llama-3.3-70b-versatile"
-}
-```
-
-### Stream Analysis (SSE)
+### Option A — pip
 
 ```bash
-curl -N -X POST http://127.0.0.1:8010/analyze/stream \
-  -H "Content-Type: application/json" \
-  -d '{"query":"show me anomalies"}'
-```
-
-## Environment Setup
-
-### Prerequisites
-
-- Python 3.11
-- Conda (recommended)
-
-### Installation
-
-```bash
+git clone https://github.com/farisabouagour/insightops-ai.git
 cd insightops-ai
-conda env create -f environment.yml
-conda activate insightops-ai
-```
-
-### Configuration
-
-Create `.env` from the template:
-
-PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Then set your API keys:
-
-- `GROQ_API_KEY`
-- `HF_API_KEY`
-- `JETSTREAM_API_KEY`
-
-Recommended core settings:
-
-```ini
-INSIGHTOPS_LLM_ENABLED=true
-INSIGHTOPS_LLM_PROVIDER_ORDER=groq,huggingface,jetstream
-INSIGHTOPS_FAST_MODEL=llama-3.1-8b-instant
-INSIGHTOPS_STRONG_MODEL=llama-3.3-70b-versatile
-INSIGHTOPS_STRONG_MODEL_MIN_TOKENS=12
-INSIGHTOPS_GROQ_TIMEOUT=4
-INSIGHTOPS_HF_TIMEOUT=8
-INSIGHTOPS_JETSTREAM_TIMEOUT=10
-INSIGHTOPS_CB_FAILURE_THRESHOLD=3
-INSIGHTOPS_CB_COOLDOWN_SECONDS=60
-INSIGHTOPS_DATA_CACHE_TTL_SECONDS=300
-```
-
-### Run API
-
-```bash
+pip install -r requirements.txt
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
 ```
 
-Swagger docs:
-
-- http://127.0.0.1:8010/docs
-
-## Testing
+### Option B — conda
 
 ```bash
-python -m unittest discover -s tests -p "test_*.py"
+conda env create -f environment.yml
+conda activate insightops-ai
+uvicorn app.main:app --reload --port 8010
 ```
 
-Current baseline:
+### Option C — Docker
 
-- 30 tests
-- Coverage for agent loop, provider routing, tool contracts, and v0.4 features
+```bash
+docker compose up --build       # → http://127.0.0.1:8010
+```
 
-## Project Structure
+Then open:
+
+- 🎨 **Dashboard** → <http://127.0.0.1:8010/>
+- 📚 **Swagger docs** → <http://127.0.0.1:8010/docs>
+- 📊 **Metrics** → <http://127.0.0.1:8010/metrics>
+
+> **No API keys?** No problem — the mock provider keeps everything working. To enable real LLMs,
+> copy `.env.example` to `.env` and set `INSIGHTOPS_LLM_ENABLED=true` plus any of
+> `GROQ_API_KEY` / `HF_API_KEY` / `JETSTREAM_API_KEY`.
+
+---
+
+## 🔌 API endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET`  | `/` | Interactive dashboard |
+| `GET`  | `/api` | Service banner / version |
+| `GET`  | `/health` | Service · data · provider health |
+| `GET`  | `/metrics` · `/metrics/prometheus` | Metrics (JSON / Prometheus) |
+| `GET`  | `/traces` · `/traces/{id}` | Request traces |
+| `GET`  | `/prompts` | Registered prompt versions |
+| `GET`  | `/history` | Recent analyzed queries |
+| `POST` | `/analyze` | Single explainable analysis |
+| `POST` | `/analyze/consensus` | **Multi-agent consensus** |
+| `POST` | `/analyze/stream` | Streaming analysis (SSE) |
+| `POST` | `/admin/cache/invalidate` | Clear sales cache |
+
+---
+
+## 🧪 Quality gate
+
+The same checks CI enforces, in one command:
+
+```bash
+make check     # ruff (lint+format) · mypy · pytest · eval
+```
+
+- ✅ **62 hermetic tests** (no network) — agents, LLMOps, consensus, dashboard, resilience.
+- ✅ **ruff** clean · **mypy** clean over `app/`.
+- ✅ **eval** accuracy gate on every push.
+- ✅ **Docker** image builds in CI.
+
+---
+
+## 🗂️ Project structure
 
 ```text
 insightops-ai/
 ├── app/
-│   ├── main.py
-│   ├── schemas.py
-│   ├── core/
-│   │   ├── config.py
-│   │   ├── logging_config.py
-│   │   ├── cache.py
-│   │   ├── circuit_breaker.py
-│   │   └── metrics.py
-│   ├── agents/
-│   │   ├── simple_agent.py
-│   │   ├── llm_decision.py
-│   │   ├── llm_providers.py
-│   │   └── model_router.py
-│   ├── analysis/
-│   │   └── advanced_analytics.py
-│   ├── services/
-│   │   └── query_history.py
-│   └── tools/
-│       └── sales_tools.py
-├── data/
-│   ├── sales.csv
-│   └── generate_sales_data.py
-├── tests/
-│   ├── test_agent_loop.py
-│   └── test_v04_features.py
-├── environment.yml
-├── .env.example
-├── GETTING_STARTED.md
-└── README.md
+│   ├── main.py              # FastAPI app + routes + dashboard mount
+│   ├── agents/              # decision loop, providers, prompts, multi-agent consensus
+│   ├── analysis/            # anomaly · forecast · trend
+│   ├── core/                # config · tracing · guardrails · pricing · metrics · cache · breaker
+│   ├── eval/                # golden dataset + eval runner
+│   ├── tools/               # deterministic sales analytics
+│   └── static/              # zero-build dashboard
+├── tests/                   # pytest suite (hermetic)
+├── docs/ARCHITECTURE.md     # deep-dive diagrams
+├── Dockerfile · docker-compose.yml · Makefile
+└── .github/workflows/ci.yml
 ```
 
-## License
+---
 
-Internal project.
+## 🧭 Configuration highlights
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `INSIGHTOPS_LLM_ENABLED` | `false` | Turn the LLM decision layer on |
+| `INSIGHTOPS_LLM_MOCK_ENABLED` | `true` | Offline deterministic fallback provider |
+| `INSIGHTOPS_LLM_PROVIDER_ORDER` | `groq,huggingface,jetstream` | Provider preference chain |
+| `INSIGHTOPS_FAST_MODEL` / `_STRONG_MODEL` | llama 8b / 70b | Adaptive model routing |
+| `INSIGHTOPS_CB_FAILURE_THRESHOLD` | `3` | Circuit-breaker trip threshold |
+| `INSIGHTOPS_JSON_LOGS` | `false` | Structured JSON logging |
+
+See [.env.example](.env.example) for the full list.
+
+---
+
+## 🛣️ Roadmap & changelog
+
+Version history is tracked in **[CHANGELOG.md](CHANGELOG.md)**. Current release: **v0.5.0**
+(agentic consensus + LLMOps + dashboard + CI/Docker).
+
+## 🤝 Contributing
+
+Contributions are welcome — see **[CONTRIBUTING.md](CONTRIBUTING.md)**. The project runs fully
+offline, so you can start without any API keys.
+
+## 📄 License
+
+[MIT](LICENSE) © 2026 Faris Abouagour
+
+<div align="center">
+<sub>Built with FastAPI · pandas · Chart.js — designed for clarity, resilience, and observability.</sub>
+</div>
