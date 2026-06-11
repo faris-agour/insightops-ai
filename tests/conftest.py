@@ -9,7 +9,6 @@ that intend to exercise an LLM-enabled path opt back in explicitly.
 from __future__ import annotations
 
 import pytest
-
 from app.core.config import get_settings
 
 

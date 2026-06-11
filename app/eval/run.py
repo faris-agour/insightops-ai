@@ -98,7 +98,10 @@ def main(argv: list[str] | None = None) -> int:
         print(_render_human(report))
 
     if report.accuracy < args.threshold:
-        print(f"\nFAIL: accuracy {report.accuracy:.1%} < threshold {args.threshold:.1%}", file=sys.stderr)
+        print(
+            f"\nFAIL: accuracy {report.accuracy:.1%} < threshold {args.threshold:.1%}",
+            file=sys.stderr,
+        )
         return 1
     return 0
 

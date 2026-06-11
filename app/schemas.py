@@ -2,7 +2,6 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-
 VALID_INTENTS = Literal[
     "sales_report",
     "sales_status",
@@ -17,7 +16,9 @@ VALID_INTENTS = Literal[
 
 
 class AnalyzeRequest(BaseModel):
-    query: str = Field(..., min_length=1, max_length=500, description="Natural language sales query")
+    query: str = Field(
+        ..., min_length=1, max_length=500, description="Natural language sales query"
+    )
 
     @field_validator("query")
     @classmethod

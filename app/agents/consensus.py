@@ -34,6 +34,7 @@ logger = get_logger(__name__)
 
 # --- Specialized agents ------------------------------------------------------
 
+
 class TrendAnalystAgent(Agent):
     name = "Trend Analyst"
     role = "trend"
@@ -100,6 +101,7 @@ class ForecastingSpecialistAgent(Agent):
 
 # --- Workspace ---------------------------------------------------------------
 
+
 @dataclass
 class ConsensusWorkspace:
     """Shared blackboard collecting findings from all specialized agents."""
@@ -114,6 +116,7 @@ class ConsensusWorkspace:
 
 
 # --- Reconciler --------------------------------------------------------------
+
 
 @dataclass
 class ReconciledVerdict:
@@ -176,9 +179,7 @@ class ReconcilerAgent:
             span.attributes.update({"source": verdict.source, "conflicts": len(conflicts)})
             return verdict
 
-    def _fallback(
-        self, workspace: ConsensusWorkspace, conflicts: list[str]
-    ) -> ReconciledVerdict:
+    def _fallback(self, workspace: ConsensusWorkspace, conflicts: list[str]) -> ReconciledVerdict:
         parts = [f"{f.agent}: {f.insight}" for f in workspace.findings]
         avg_conf = (
             sum(f.confidence for f in workspace.findings) / len(workspace.findings)
@@ -195,9 +196,7 @@ class ReconcilerAgent:
             if conflicts
             else " Recommendation: proceed with the prevailing trend and keep monitoring."
         )
-        insight = (
-            "Integrated view -> " + " | ".join(parts) + "." + tension + recommendation
-        )
+        insight = "Integrated view -> " + " | ".join(parts) + "." + tension + recommendation
         # Conflicts reduce overall confidence in a single cohesive call.
         confidence = max(0.4, avg_conf - 0.1 * len(conflicts))
         return ReconciledVerdict(
@@ -206,6 +205,7 @@ class ReconcilerAgent:
 
 
 # --- Orchestrator ------------------------------------------------------------
+
 
 class AgentOrchestrator:
     def __init__(self) -> None:

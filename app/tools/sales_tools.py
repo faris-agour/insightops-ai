@@ -62,7 +62,9 @@ def get_sales_summary() -> dict[str, float | str]:
     total_revenue = float(sales_df["revenue"].sum())
 
     daily_revenue = _daily_revenue(sales_df)
-    average_daily_revenue = float(daily_revenue["revenue"].mean()) if not daily_revenue.empty else 0.0
+    average_daily_revenue = (
+        float(daily_revenue["revenue"].mean()) if not daily_revenue.empty else 0.0
+    )
 
     product_revenue = _product_revenue(sales_df)
     if product_revenue.empty:
@@ -88,7 +90,9 @@ def get_sales_status() -> dict[str, float | str]:
     sales_df = load_sales_data()
     daily_revenue = _daily_revenue(sales_df)
     total_revenue = float(sales_df["revenue"].sum())
-    average_daily_revenue = float(daily_revenue["revenue"].mean()) if not daily_revenue.empty else 0.0
+    average_daily_revenue = (
+        float(daily_revenue["revenue"].mean()) if not daily_revenue.empty else 0.0
+    )
 
     if daily_revenue.empty:
         return {

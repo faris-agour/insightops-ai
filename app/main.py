@@ -2,6 +2,7 @@ import asyncio
 import json
 import time
 from pathlib import Path
+from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -55,7 +56,10 @@ async def log_requests(request: Request, call_next):
     duration_ms = (time.perf_counter() - start) * 1000
     logger.info(
         "%s %s -> %d (%.1fms)",
-        request.method, request.url.path, response.status_code, duration_ms,
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration_ms,
     )
     return response
 
@@ -100,11 +104,10 @@ def health() -> HealthStatus:
         data_source_ok = False
 
     available_providers = [
-        provider.get_name()
-        for provider in get_providers_in_order()
-        if provider.is_configured()
+        provider.get_name() for provider in get_providers_in_order() if provider.is_configured()
     ]
 
+    status: Literal["ok", "degraded", "error"]
     if not data_source_ok:
         status = "error"
     elif settings.LLM_ENABLED and not available_providers:

@@ -54,7 +54,7 @@ def _env_bool(name: str, default: bool = False) -> bool:
 
 class Settings:
     APP_NAME = "InsightOps AI"
-    APP_VERSION = "0.4.0"
+    APP_VERSION = "0.5.0"
 
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
 

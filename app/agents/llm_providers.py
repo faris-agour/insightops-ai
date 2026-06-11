@@ -35,7 +35,9 @@ class GroqProvider(LLMProvider):
 
     def __init__(self) -> None:
         self.api_key = os.getenv("GROQ_API_KEY", "").strip()
-        self.api_url = os.getenv("GROQ_API_URL", self.DEFAULT_API_URL).strip() or self.DEFAULT_API_URL
+        self.api_url = (
+            os.getenv("GROQ_API_URL", self.DEFAULT_API_URL).strip() or self.DEFAULT_API_URL
+        )
 
     def is_configured(self) -> bool:
         return bool(self.api_key)
@@ -163,7 +165,9 @@ class HuggingFaceProvider(LLMProvider):
         endpoint = f"{self.api_url}/{chosen_model}"
 
         try:
-            response = requests.post(endpoint, json=payload, headers=headers, timeout=timeout_seconds)
+            response = requests.post(
+                endpoint, json=payload, headers=headers, timeout=timeout_seconds
+            )
             response.raise_for_status()
             response_json = response.json()
         except requests.Timeout as exc:
@@ -195,7 +199,9 @@ class JetstreamProvider(LLMProvider):
 
     def __init__(self) -> None:
         self.api_key = os.getenv("JETSTREAM_API_KEY", "").strip()
-        self.api_url = os.getenv("JETSTREAM_API_URL", self.DEFAULT_API_URL).strip() or self.DEFAULT_API_URL
+        self.api_url = (
+            os.getenv("JETSTREAM_API_URL", self.DEFAULT_API_URL).strip() or self.DEFAULT_API_URL
+        )
         self.model = os.getenv("JETSTREAM_MODEL", self.DEFAULT_MODEL).strip() or self.DEFAULT_MODEL
 
     def is_configured(self) -> bool:
@@ -311,7 +317,9 @@ def _mock_enabled() -> bool:
 
 def get_providers_in_order() -> list[LLMProvider]:
     default_order = "groq,huggingface,jetstream"
-    provider_order = os.getenv("INSIGHTOPS_LLM_PROVIDER_ORDER", default_order).strip() or default_order
+    provider_order = (
+        os.getenv("INSIGHTOPS_LLM_PROVIDER_ORDER", default_order).strip() or default_order
+    )
 
     provider_names = [name.strip().lower() for name in provider_order.split(",")]
 

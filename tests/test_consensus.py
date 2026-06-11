@@ -1,7 +1,6 @@
 """Tests for the multi-agent consensus system."""
 
-from fastapi.testclient import TestClient
-
+from app.agents.base import AgentFinding
 from app.agents.consensus import (
     AgentOrchestrator,
     ConsensusWorkspace,
@@ -11,8 +10,8 @@ from app.agents.consensus import (
     TrendAnalystAgent,
     run_consensus_analysis,
 )
-from app.agents.base import AgentFinding
 from app.main import app
+from fastapi.testclient import TestClient
 
 
 class TestSpecializedAgents:
@@ -49,12 +48,16 @@ class TestReconciler:
     def test_detects_optimism_vs_risk_conflict(self) -> None:
         workspace = ConsensusWorkspace()
         workspace.publish(
-            AgentFinding("Forecasting Specialist", "forecast", "up", 0.8,
-                         evidence={"trend_direction": "increasing"})
+            AgentFinding(
+                "Forecasting Specialist",
+                "forecast",
+                "up",
+                0.8,
+                evidence={"trend_direction": "increasing"},
+            )
         )
         workspace.publish(
-            AgentFinding("Risk Assessor", "risk", "risky", 0.8,
-                         evidence={"anomaly_count": 3})
+            AgentFinding("Risk Assessor", "risk", "risky", 0.8, evidence={"anomaly_count": 3})
         )
         conflicts = ReconcilerAgent()._detect_conflicts(workspace)
         assert any("fragile" in c or "anomalies" in c for c in conflicts)

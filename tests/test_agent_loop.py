@@ -7,11 +7,9 @@ from app.agents.llm_providers import (
     GroqProvider,
     HuggingFaceProvider,
     JetstreamProvider,
-    LLMProviderError,
     get_providers_in_order,
 )
 from app.agents.model_router import select_model
-
 from app.agents.simple_agent import classify_task, run_agent
 from app.main import AnalyzeRequest, analyze
 from app.tools.sales_tools import (
@@ -223,5 +221,3 @@ class TestAgentLoop(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-

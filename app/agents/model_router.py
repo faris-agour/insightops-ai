@@ -1,7 +1,6 @@
 import os
 import re
 
-
 DEFAULT_FAST_MODEL = "llama-3.1-8b-instant"
 DEFAULT_STRONG_MODEL = "llama-3.3-70b-versatile"
 DEFAULT_STRONG_MODEL_MIN_TOKENS = 12
@@ -64,9 +63,7 @@ def select_model(query: str) -> str:
 
     extra_keywords_raw = os.getenv("INSIGHTOPS_STRONG_MODEL_KEYWORDS", "")
     extra_keywords = {
-        keyword.strip().lower()
-        for keyword in extra_keywords_raw.split(",")
-        if keyword.strip()
+        keyword.strip().lower() for keyword in extra_keywords_raw.split(",") if keyword.strip()
     }
 
     complexity_keywords = DEFAULT_COMPLEXITY_KEYWORDS.union(extra_keywords)

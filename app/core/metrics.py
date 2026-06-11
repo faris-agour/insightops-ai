@@ -1,6 +1,7 @@
 import threading
 import time
 from collections import defaultdict, deque
+from typing import Any
 
 
 class MetricsRegistry:
@@ -56,7 +57,7 @@ class MetricsRegistry:
         rank = max(0, min(len(ordered) - 1, round((pct / 100) * (len(ordered) - 1))))
         return round(ordered[rank], 2)
 
-    def snapshot(self) -> dict[str, object]:
+    def snapshot(self) -> dict[str, Any]:
         with self._lock:
             latencies = list(self._latencies)
             avg_latency = sum(latencies) / len(latencies) if latencies else 0.0
@@ -103,16 +104,33 @@ class MetricsRegistry:
         latency = snap["latency_ms"]
         metric("insightops_latency_ms_avg", latency["avg"], "Average request latency (ms)")
         metric("insightops_latency_ms_p95", latency["p95"], "p95 request latency (ms)")
-        metric("insightops_llm_tokens_total", snap["llm_tokens"]["total"], "Total LLM tokens used", "counter")
-        metric("insightops_llm_cost_usd_total", snap["llm_cost_usd"]["total"], "Estimated LLM cost (USD)", "counter")
-        metric("insightops_guardrail_flagged_total", snap["guardrails"]["flagged_inputs"], "Inputs flagged by guardrails", "counter")
+        metric(
+            "insightops_llm_tokens_total",
+            snap["llm_tokens"]["total"],
+            "Total LLM tokens used",
+            "counter",
+        )
+        metric(
+            "insightops_llm_cost_usd_total",
+            snap["llm_cost_usd"]["total"],
+            "Estimated LLM cost (USD)",
+            "counter",
+        )
+        metric(
+            "insightops_guardrail_flagged_total",
+            snap["guardrails"]["flagged_inputs"],
+            "Inputs flagged by guardrails",
+            "counter",
+        )
 
         for key, value in snap["counters"].items():
             safe = key.replace(".", "_").replace("-", "_")
             lines.append(f'insightops_counter{{name="{safe}"}} {value}')
         for provider, stats in snap["providers"].items():
             lines.append(f'insightops_provider_calls{{provider="{provider}"}} {stats["calls"]}')
-            lines.append(f'insightops_provider_failures{{provider="{provider}"}} {stats["failures"]}')
+            lines.append(
+                f'insightops_provider_failures{{provider="{provider}"}} {stats["failures"]}'
+            )
 
         return "\n".join(lines) + "\n"
 

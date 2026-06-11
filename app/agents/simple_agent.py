@@ -1,5 +1,7 @@
 import re
 import time
+from collections.abc import Callable
+from typing import Any
 
 from app.agents.llm_decision import LLMDecisionError, decide_with_llm
 from app.analysis.advanced_analytics import (
@@ -32,7 +34,17 @@ PRODUCT_KEYWORDS = {"product", "products", "item", "items", "sku"}
 REGION_KEYWORDS = {"region", "regions", "area", "areas", "territory", "territories"}
 COMPARE_KEYWORDS = {"compare", "comparison", "versus", "vs"}
 GENERATE_KEYWORDS = {"generate", "create", "show", "give", "provide"}
-ANOMALY_KEYWORDS = {"anomaly", "anomalies", "outlier", "outliers", "spike", "spikes", "drop", "unusual", "abnormal"}
+ANOMALY_KEYWORDS = {
+    "anomaly",
+    "anomalies",
+    "outlier",
+    "outliers",
+    "spike",
+    "spikes",
+    "drop",
+    "unusual",
+    "abnormal",
+}
 FORECAST_KEYWORDS = {"forecast", "predict", "prediction", "projection", "future", "next"}
 TREND_KEYWORDS = {"trend", "trending", "moving", "growth", "decline", "trajectory"}
 
@@ -64,16 +76,22 @@ def classify_task(query: str) -> str:
     has_sales_context = _contains_any(tokens, SALES_KEYWORDS)
 
     has_product_context = _contains_any(tokens, PRODUCT_KEYWORDS)
-    has_top_signal = _contains_any(tokens, TOP_KEYWORDS) or ("selling" in tokens and "most" in tokens)
+    has_top_signal = _contains_any(tokens, TOP_KEYWORDS) or (
+        "selling" in tokens and "most" in tokens
+    )
     if has_product_context and has_top_signal:
         return "top_product"
 
-    has_worst_signal = _contains_any(tokens, WORST_KEYWORDS) or ("selling" in tokens and "least" in tokens)
+    has_worst_signal = _contains_any(tokens, WORST_KEYWORDS) or (
+        "selling" in tokens and "least" in tokens
+    )
     if has_product_context and has_worst_signal:
         return "worst_product"
 
     has_region_context = _contains_any(tokens, REGION_KEYWORDS)
-    has_region_signal = _contains_any(tokens, COMPARE_KEYWORDS.union(TOP_KEYWORDS).union(WORST_KEYWORDS))
+    has_region_signal = _contains_any(
+        tokens, COMPARE_KEYWORDS.union(TOP_KEYWORDS).union(WORST_KEYWORDS)
+    )
     if has_region_context and (has_sales_context or has_region_signal):
         return "sales_by_region"
 
@@ -83,7 +101,9 @@ def classify_task(query: str) -> str:
     if has_report_intent and (has_sales_context or "report" in tokens):
         return "sales_report"
 
-    has_status_intent = _contains_any(tokens, STATUS_KEYWORDS) or "how are sales" in normalized_query
+    has_status_intent = (
+        _contains_any(tokens, STATUS_KEYWORDS) or "how are sales" in normalized_query
+    )
     if has_sales_context and has_status_intent:
         return "sales_status"
 
@@ -93,7 +113,7 @@ def classify_task(query: str) -> str:
     return "unknown"
 
 
-def build_insight(task: str, result: dict[str, object]) -> str:
+def build_insight(task: str, result: dict[str, Any]) -> str:
     if task == "sales_report":
         top_product = str(result.get("top_product", "Top product"))
         worst_product = str(result.get("worst_product", "other products"))
@@ -123,10 +143,10 @@ def build_insight(task: str, result: dict[str, object]) -> str:
             recommendation = "Investigate root causes and take corrective action."
         else:
             summary = "Sales performance is holding steady with minor daily fluctuations."
-            reasoning = (
-                f"The relatively stable trend (daily change: {daily_change:.1f}%) suggests a balanced market environment."
+            reasoning = f"The relatively stable trend (daily change: {daily_change:.1f}%) suggests a balanced market environment."
+            recommendation = (
+                "Focus on incremental improvements to product offerings and customer retention."
             )
-            recommendation = "Focus on incremental improvements to product offerings and customer retention."
         return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "top_product":
@@ -138,9 +158,7 @@ def build_insight(task: str, result: dict[str, object]) -> str:
             f"With ${revenue:,.2f} in revenue ({pct_of_total:.1f}% of total), {product} represents "
             "the strongest market segment and customer preference alignment."
         )
-        recommendation = (
-            f"Maintain investment in {product} while leveraging its success to cross-sell complementary products."
-        )
+        recommendation = f"Maintain investment in {product} while leveraging its success to cross-sell complementary products."
         return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "worst_product":
@@ -148,24 +166,16 @@ def build_insight(task: str, result: dict[str, object]) -> str:
         revenue = float(result.get("revenue", 0))
         pct_of_total = float(result.get("percent_of_total_revenue", 0))
         summary = f"{product} is underperforming relative to other offerings."
-        reasoning = (
-            f"At ${revenue:,.2f} ({pct_of_total:.1f}% of total revenue), {product} shows weak market adoption."
-        )
-        recommendation = (
-            f"Either reinvest in {product} with targeted improvements, or consider discontinuing it to free resources."
-        )
+        reasoning = f"At ${revenue:,.2f} ({pct_of_total:.1f}% of total revenue), {product} shows weak market adoption."
+        recommendation = f"Either reinvest in {product} with targeted improvements, or consider discontinuing it to free resources."
         return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "sales_by_region":
         best_region = str(result.get("best_region", "Unknown region"))
         best_revenue = float(result.get("best_region_revenue", 0))
         summary = f"Regional sales performance varies, with {best_region} leading the way."
-        reasoning = (
-            f"{best_region} generated ${best_revenue:,.2f}, representing the strongest regional execution."
-        )
-        recommendation = (
-            f"Analyze {best_region}'s success factors and replicate them in lower-performing regions."
-        )
+        reasoning = f"{best_region} generated ${best_revenue:,.2f}, representing the strongest regional execution."
+        recommendation = f"Analyze {best_region}'s success factors and replicate them in lower-performing regions."
         return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "anomaly_detection":
@@ -177,7 +187,9 @@ def build_insight(task: str, result: dict[str, object]) -> str:
             recommendation = "Maintain current operational cadence and continue monitoring."
         else:
             anomalies = result.get("anomalies", []) or []
-            spikes = sum(1 for a in anomalies if isinstance(a, dict) and a.get("direction") == "spike")
+            spikes = sum(
+                1 for a in anomalies if isinstance(a, dict) and a.get("direction") == "spike"
+            )
             drops = count - spikes
             summary = f"{count} revenue anomalies detected ({spikes} spikes, {drops} drops)."
             reasoning = (
@@ -192,12 +204,8 @@ def build_insight(task: str, result: dict[str, object]) -> str:
         direction = str(result.get("trend_direction", "flat"))
         slope = float(result.get("daily_growth_estimate", 0) or 0)
         summary = f"Revenue forecast for the next {horizon} days projects a {direction} trajectory."
-        reasoning = (
-            f"Linear regression on historical daily revenue yielded a slope of ${slope:,.2f} per day."
-        )
-        recommendation = (
-            "Use this forecast for short-term planning; combine with anomaly detection for risk-aware decisions."
-        )
+        reasoning = f"Linear regression on historical daily revenue yielded a slope of ${slope:,.2f} per day."
+        recommendation = "Use this forecast for short-term planning; combine with anomaly detection for risk-aware decisions."
         return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     if task == "trend_analysis":
@@ -206,13 +214,15 @@ def build_insight(task: str, result: dict[str, object]) -> str:
         window = int(result.get("window", 0) or 0)
         summary = f"Moving-average trend over a {window}-day window is {trend}."
         reasoning = f"Smoothed series shows a {change:+.1f}% change between the earliest and latest averages."
-        recommendation = "Use the smoothed trend to filter daily noise and inform mid-term strategy."
+        recommendation = (
+            "Use the smoothed trend to filter daily noise and inform mid-term strategy."
+        )
         return f"{summary}\n\n{reasoning}\n\n{recommendation}"
 
     return "No matching analysis is available for this query yet."
 
 
-TASK_HANDLERS = {
+TASK_HANDLERS: dict[str, Callable[[], dict[str, Any]]] = {
     "sales_report": get_sales_summary,
     "sales_status": get_sales_status,
     "top_product": get_top_product,
@@ -224,7 +234,7 @@ TASK_HANDLERS = {
 }
 
 
-def run_agent(query: str) -> dict[str, object]:
+def run_agent(query: str) -> dict[str, Any]:
     started = time.perf_counter()
     trace = tracing.start_trace(query)
     task: str
@@ -239,9 +249,7 @@ def run_agent(query: str) -> dict[str, object]:
         if guard.flagged:
             guard_span.attributes["reasons"] = guard.reasons
             _metrics.record_guardrail_flag()
-            logger.warning(
-                "Guardrail flagged query '%s': %s", redact_pii(query), guard.reasons
-            )
+            logger.warning("Guardrail flagged query '%s': %s", redact_pii(query), guard.reasons)
 
     with tracing.span("decision") as decision_span:
         try:
@@ -265,7 +273,7 @@ def run_agent(query: str) -> dict[str, object]:
     handler = TASK_HANDLERS.get(task)
     with tracing.span("tool_execution", tool=getattr(handler, "__name__", "none")):
         try:
-            result: dict[str, object] = handler() if handler else {}
+            result: dict[str, Any] = handler() if handler else {}
         except Exception as exc:
             logger.exception("Tool handler %s failed: %s", task, exc)
             result = {"error": "tool_execution_failed"}

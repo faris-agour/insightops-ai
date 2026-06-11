@@ -73,7 +73,7 @@ TREND_ANALYST = Prompt(
         "You are a Trend Analyst on a sales intelligence team. "
         "Given the trend metrics below, state in 1-2 sentences where momentum is heading "
         "and how strong it is. Be specific and business-focused. "
-        "Return JSON only: {{\"insight\": str, \"confidence\": float between 0 and 1}}.\n\n"
+        'Return JSON only: {{"insight": str, "confidence": float between 0 and 1}}.\n\n'
         "Trend metrics: {metrics}"
     ),
 )
@@ -86,7 +86,7 @@ RISK_ASSESSOR = Prompt(
         "You are a Risk Assessor on a sales intelligence team. "
         "Given the anomaly metrics below, state in 1-2 sentences the most important risk "
         "or instability signal, or confirm stability if none. "
-        "Return JSON only: {{\"insight\": str, \"confidence\": float between 0 and 1}}.\n\n"
+        'Return JSON only: {{"insight": str, "confidence": float between 0 and 1}}.\n\n'
         "Anomaly metrics: {metrics}"
     ),
 )
@@ -99,7 +99,7 @@ FORECASTING_SPECIALIST = Prompt(
         "You are a Forecasting Specialist on a sales intelligence team. "
         "Given the forecast metrics below, state in 1-2 sentences the expected near-term "
         "trajectory and its direction. "
-        "Return JSON only: {{\"insight\": str, \"confidence\": float between 0 and 1}}.\n\n"
+        'Return JSON only: {{"insight": str, "confidence": float between 0 and 1}}.\n\n'
         "Forecast metrics: {metrics}"
     ),
 )
@@ -113,7 +113,7 @@ RECONCILER = Prompt(
         "specialist agents (trend, risk, forecast). Produce a single cohesive executive "
         "insight that integrates them, explicitly notes any tension between optimism and risk, "
         "and ends with one concrete recommendation. "
-        "Return JSON only: {{\"insight\": str, \"confidence\": float between 0 and 1}}.\n\n"
+        'Return JSON only: {{"insight": str, "confidence": float between 0 and 1}}.\n\n'
         "Specialist findings: {findings}"
     ),
 )

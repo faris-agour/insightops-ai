@@ -35,7 +35,6 @@ dev = [
     "ruff>=0.4",
     "mypy>=1.9",
     "types-requests",
-    "pandas-stubs",
     "pre-commit>=3.6",
 ]
 

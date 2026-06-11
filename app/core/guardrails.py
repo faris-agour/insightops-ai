@@ -17,10 +17,22 @@ import re
 from dataclasses import dataclass, field
 
 _INJECTION_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
-    ("override_instructions", re.compile(r"\b(ignore|disregard|forget)\b.{0,20}\b(previous|above|prior|system)\b", re.I)),
-    ("reveal_system_prompt", re.compile(r"\b(system prompt|your instructions|your rules|reveal).{0,20}\b(prompt|instructions|rules)\b", re.I)),
+    (
+        "override_instructions",
+        re.compile(r"\b(ignore|disregard|forget)\b.{0,20}\b(previous|above|prior|system)\b", re.I),
+    ),
+    (
+        "reveal_system_prompt",
+        re.compile(
+            r"\b(system prompt|your instructions|your rules|reveal).{0,20}\b(prompt|instructions|rules)\b",
+            re.I,
+        ),
+    ),
     ("role_hijack", re.compile(r"\byou are now\b|\bact as\b|\bpretend to be\b", re.I)),
-    ("instruction_injection", re.compile(r"\bnew instructions?\b|\boverride\b|\bjailbreak\b", re.I)),
+    (
+        "instruction_injection",
+        re.compile(r"\bnew instructions?\b|\boverride\b|\bjailbreak\b", re.I),
+    ),
 )
 
 _EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")

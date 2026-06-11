@@ -3,8 +3,6 @@
 import os
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
-
 from app.agents.llm_providers import MockLLMProvider, get_providers_in_order
 from app.agents.prompts import get_prompt_registry
 from app.core import tracing
@@ -12,6 +10,7 @@ from app.core.guardrails import redact_pii, scan_input
 from app.core.metrics import MetricsRegistry
 from app.core.pricing import estimate_cost, rate_for
 from app.main import app
+from fastapi.testclient import TestClient
 
 
 class TestTracing:
@@ -144,8 +143,9 @@ class TestEndToEndApi:
             "JETSTREAM_API_KEY": "",
         }
         # Settings is evaluated at import, so flip the live flag directly.
-        with patch.dict(os.environ, env, clear=False), patch.object(
-            llm_decision._settings, "LLM_ENABLED", True
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.object(llm_decision._settings, "LLM_ENABLED", True),
         ):
             result = run_agent("forecast next week revenue")
 

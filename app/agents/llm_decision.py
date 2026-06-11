@@ -57,11 +57,11 @@ def _extract_json_payload(raw_content: str) -> dict[str, Any]:
 
     try:
         payload = json.loads(raw_content)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as exc:
         decoder = json.JSONDecoder()
         start = raw_content.find("{")
         if start == -1:
-            raise LLMDecisionError("LLM output is not valid JSON")
+            raise LLMDecisionError("LLM output is not valid JSON") from exc
         try:
             payload, _ = decoder.raw_decode(raw_content[start:])
         except json.JSONDecodeError as exc:
@@ -146,7 +146,11 @@ def decide_with_llm(query: str) -> dict[str, str]:
             _metrics.record_cost(model_used, cost_usd)
             logger.info(
                 "LLM decision: provider=%s model=%s intent=%s tokens=%d cost=$%.6f",
-                provider_name, model_used, decision["intent"], tokens, cost_usd,
+                provider_name,
+                model_used,
+                decision["intent"],
+                tokens,
+                cost_usd,
             )
             return decision
         except (LLMProviderError, LLMDecisionError) as exc:
