@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🧠 InsightOps AI
+#  InsightOps AI
 
-### Agentic sales-analytics platform — multi-agent consensus, resilient LLM routing, and first-class LLMOps.
+### Agentic sales-analytics platform -- multi-agent consensus, resilient LLM routing, and first-class LLMOps.
 
 [![CI](https://github.com/faris-agour/insightops-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/faris-agour/insightops-ai/actions/workflows/ci.yml)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -18,7 +18,7 @@ or convene a panel of specialized AI agents to debate it and reach consensus.*
 
 ---
 
-## ✨ Why this project stands out
+##  Why this project stands out
 
 Most analytics APIs return numbers. **InsightOps AI returns reasoning you can trust and observe.**
 
@@ -37,7 +37,7 @@ Most analytics APIs return numbers. **InsightOps AI returns reasoning you can tr
 
 ---
 
-## 🏗️ Architecture at a glance
+##  Architecture at a glance
 
 ```mermaid
 flowchart TD
