@@ -2,7 +2,7 @@
 
 #  InsightOps AI
 
-### Agentic sales-analytics platform - multi-agent consensus, resilient LLM routing, and first-class LLMOps.
+### Agentic sales-analytics platform — multi-agent consensus, resilient LLM routing, and first-class LLMOps.
 
 [![CI](https://github.com/faris-agour/insightops-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/faris-agour/insightops-ai/actions/workflows/ci.yml)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -22,22 +22,22 @@ or convene a panel of specialized AI agents to debate it and reach consensus.*
 
 Most analytics APIs return numbers. **InsightOps AI returns reasoning you can trust and observe.**
 
-- 🤝 **Multi-agent consensus** - three specialized agents (Trend, Risk, Forecast) analyze
+- 🤝 **Multi-agent consensus** — three specialized agents (Trend, Risk, Forecast) analyze
   independently, then a **Reconciler** synthesizes one verdict and *flags conflicts* between optimism and risk.
-- 🛰️ **LLMOps built-in** - per-request tracing, versioned prompts, guardrails, token-cost tracking,
-  an eval harness, and Prometheus metrics. Not bolted on - part of the request path.
-- 🛡️ **Resilient by design** - multi-provider LLM chain (Groq → Hugging Face → Jetstream) with a
+- 🛰️ **LLMOps built-in** — per-request tracing, versioned prompts, guardrails, token-cost tracking,
+  an eval harness, and Prometheus metrics. Not bolted on — part of the request path.
+- 🛡️ **Resilient by design** — multi-provider LLM chain (Groq → Hugging Face → Jetstream) with a
   circuit breaker, per-provider timeouts, and a **deterministic fallback that never fails**.
-- 🔌 **Runs anywhere, instantly** - a built-in **mock LLM provider** means the whole pipeline (agents
+- 🔌 **Runs anywhere, instantly** — a built-in **mock LLM provider** means the whole pipeline (agents
   included) works offline with **zero API keys**. Add keys to upgrade to real reasoning.
-- 🎨 **Interactive dashboard** - a zero-build single-page app with live SSE streaming, the agent
+- 🎨 **Interactive dashboard** — a zero-build single-page app with live SSE streaming, the agent
   panel, and an auto-refreshing observability view. Open `/` and demo it.
 
 > ⚡ **30-second demo:** `pip install -r requirements.txt && uvicorn app.main:app --port 8010` → open <http://127.0.0.1:8010>
 
 ---
 
-##  Architecture at a glance
+## 🏗️ Architecture at a glance
 
 ```mermaid
 flowchart TD
@@ -125,7 +125,7 @@ $ python -m app.eval.run
 
 ## 🚀 Quickstart
 
-### Option A - pip
+### Option A — pip
 
 ```bash
 git clone https://github.com/faris-agour/insightops-ai.git
@@ -134,7 +134,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
 ```
 
-### Option B - conda
+### Option B — conda
 
 ```bash
 conda env create -f environment.yml
@@ -142,7 +142,7 @@ conda activate insightops-ai
 uvicorn app.main:app --reload --port 8010
 ```
 
-### Option C - Docker
+### Option C — Docker
 
 ```bash
 docker compose up --build       # → http://127.0.0.1:8010
@@ -150,9 +150,9 @@ docker compose up --build       # → http://127.0.0.1:8010
 
 Then open:
 
--  **Dashboard** → <http://127.0.0.1:8010/>
--  **Swagger docs** → <http://127.0.0.1:8010/docs>
--  **Metrics** → <http://127.0.0.1:8010/metrics>
+- 🎨 **Dashboard** → <http://127.0.0.1:8010/>
+- 📚 **Swagger docs** → <http://127.0.0.1:8010/docs>
+- 📊 **Metrics** → <http://127.0.0.1:8010/metrics>
 
 > **No API keys?** No problem — the mock provider keeps everything working. To enable real LLMs,
 > copy `.env.example` to `.env` and set `INSIGHTOPS_LLM_ENABLED=true` plus any of
